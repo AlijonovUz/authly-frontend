@@ -1,4 +1,4 @@
-name: Deploy Gilam ERP Frontend
+name: Deploy Raqamli Passport Frontend
 
 on:
   push:
