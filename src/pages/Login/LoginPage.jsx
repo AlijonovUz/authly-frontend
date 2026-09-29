@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { Logo } from '../../components/icons.jsx'
 import LanguageSelect from './LanguageSelect.jsx'
 import PasswordLoginForm from './PasswordLoginForm.jsx'
 import PhoneLoginForm from './PhoneLoginForm.jsx'
@@ -17,8 +16,7 @@ const getMode = () => (window.location.hash === '#/password' ? 'password' : 'pho
 function Brand() {
   return (
     <div className="brand">
-      <Logo className="brand__logo" />
-      <span className="brand__name">Raqamli Nazorat</span>
+      <img className="brand__logo" src="/logo.svg" alt="Raqamli Nazorat" width="210" height="44" />
     </div>
   )
 }

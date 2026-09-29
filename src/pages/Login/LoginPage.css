@@ -45,15 +45,12 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
 }
 
-.brand__name {
-  font-family: var(--font-onest);
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 1;
-  color: #000;
+.brand__logo {
+  display: block;
+  width: auto;
+  height: 44px;
 }
 
 .hero__intro {
@@ -542,12 +539,7 @@
     display: flex;
   }
   .panel__top .brand__logo {
-    width: 36px;
     height: 36px;
-  }
-  .panel__top .brand__name {
-    font-size: 18px;
-    font-weight: 600;
   }
   .panel__footer {
     padding-bottom: 24px;

@@ -149,26 +149,3 @@ export function FlagEn(props) {
     </svg>
   )
 }
-
-export function Logo(props) {
-  return (
-    <svg width="44" height="44" viewBox="0 0 44 44" {...props}>
-      <circle cx="22" cy="9" r="8" fill="#8fa4ec" opacity="0.9" />
-      <circle cx="35" cy="22" r="8" fill="#5f7de0" opacity="0.9" />
-      <circle cx="22" cy="35" r="8" fill="#8fa4ec" opacity="0.9" />
-      <circle cx="9" cy="22" r="8" fill="#5f7de0" opacity="0.9" />
-      <rect x="8" y="12" width="28" height="20" rx="10" fill="#4f6bd8" />
-      <text
-        x="22"
-        y="27"
-        textAnchor="middle"
-        fontFamily="Onest, sans-serif"
-        fontWeight="800"
-        fontSize="14"
-        fill="#fff"
-      >
-        RN
-      </text>
-    </svg>
-  )
-}
