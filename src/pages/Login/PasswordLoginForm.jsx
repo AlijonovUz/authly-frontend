@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { EyeIcon, EyeOffIcon, LockIcon, UserIcon } from '../../components/icons.jsx'
+import { useI18n } from '../../i18n/context.js'
 import { AltLoginButtons, Field, FormAlert } from './FormParts.jsx'
 
 function PasswordLoginForm() {
@@ -7,8 +8,9 @@ function PasswordLoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [capsLock, setCapsLock] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState(null)
+  const [submitError, setSubmitError] = useState(null) // { attemptsLeft }
   const [passwordInvalid, setPasswordInvalid] = useState(false)
+  const { t } = useI18n()
 
   const canSubmit = form.login.trim() && form.password && !capsLock && !submitting
 
@@ -30,13 +32,7 @@ function PasswordLoginForm() {
       await Promise.resolve(form)
     } catch (err) {
       setPasswordInvalid(true)
-      setSubmitError({
-        variant: 'danger',
-        title: 'Login yoki parol notoʻgʻri',
-        message: 'Kiritilgan maʼlumotlar mos kelmadi. Tekshirib, qaytadan urinib koʻring.',
-        extra:
-          err?.attemptsLeft != null ? `Qolgan urinishlar: ${err.attemptsLeft} ta` : null,
-      })
+      setSubmitError({ attemptsLeft: err?.attemptsLeft ?? null })
     } finally {
       setSubmitting(false)
     }
@@ -44,26 +40,37 @@ function PasswordLoginForm() {
 
   return (
     <form className="form" onSubmit={handleSubmit} noValidate>
-      <h2 className="form__title">Tizimga kirish</h2>
+      <h2 className="form__title">{t('login.title')}</h2>
 
-      {submitError && <FormAlert {...submitError} />}
+      {submitError && (
+        <FormAlert
+          variant="danger"
+          title={t('password.errorTitle')}
+          message={t('password.errorText')}
+          extra={
+            submitError.attemptsLeft != null
+              ? t('password.attemptsLeft', { n: submitError.attemptsLeft })
+              : null
+          }
+        />
+      )}
 
       <div className="form__fields">
         <Field
           id="login"
-          label="Login"
+          label={t('field.login')}
           icon={UserIcon}
-          placeholder="Login kiriting"
+          placeholder={t('field.loginPlaceholder')}
           autoComplete="username"
           value={form.login}
           onChange={update('login')}
         />
         <Field
           id="password"
-          label="Parol"
+          label={t('field.password')}
           icon={LockIcon}
           type={showPassword ? 'text' : 'password'}
-          placeholder="Parol kiriting"
+          placeholder={t('field.passwordPlaceholder')}
           autoComplete="current-password"
           value={form.password}
           onChange={update('password')}
@@ -71,13 +78,13 @@ function PasswordLoginForm() {
           onKeyUp={trackCapsLock}
           onBlur={() => setCapsLock(false)}
           error={passwordInvalid}
-          warning={capsLock ? 'Caps Lock yoqilgan — parol katta harflarda kiritilmoqda' : null}
+          warning={capsLock ? t('password.capsLock') : null}
           trailing={
             form.password && (
               <button
                 type="button"
                 className="field__toggle"
-                aria-label={showPassword ? 'Parolni yashirish' : 'Parolni koʻrsatish'}
+                aria-label={showPassword ? t('password.hide') : t('password.show')}
                 onClick={() => setShowPassword((v) => !v)}
               >
                 {showPassword ? <EyeOffIcon /> : <EyeIcon />}
@@ -88,7 +95,7 @@ function PasswordLoginForm() {
       </div>
 
       <button type="submit" className="btn-primary" disabled={!canSubmit}>
-        Kirish
+        {t('login.submit')}
       </button>
 
       <AltLoginButtons />

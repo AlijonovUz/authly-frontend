@@ -1,24 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronDownIcon, FlagEn, FlagRu, FlagUz } from '../../components/icons.jsx'
+import { useI18n } from '../../i18n/context.js'
 
 const LANGUAGES = [
-  { code: 'UZ', Flag: FlagUz },
-  { code: 'RU', Flag: FlagRu },
-  { code: 'EN', Flag: FlagEn },
+  { code: 'uz', Flag: FlagUz },
+  { code: 'ru', Flag: FlagRu },
+  { code: 'en', Flag: FlagEn },
 ]
 
 function LanguageSelect() {
   const [open, setOpen] = useState(false)
-  const [lang, setLang] = useState(LANGUAGES[0])
+  const { lang, setLang, t } = useI18n()
   const ref = useRef(null)
+  const current = LANGUAGES.find((item) => item.code === lang) ?? LANGUAGES[0]
 
   useEffect(() => {
     if (!open) return
     const close = (e) => {
       if (!ref.current?.contains(e.target)) setOpen(false)
     }
+    const closeOnEscape = (e) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
     document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
+    document.addEventListener('keydown', closeOnEscape)
+    return () => {
+      document.removeEventListener('mousedown', close)
+      document.removeEventListener('keydown', closeOnEscape)
+    }
   }, [open])
 
   return (
@@ -26,12 +35,13 @@ function LanguageSelect() {
       <button
         type="button"
         className="lang__trigger"
+        aria-label={t('lang.label')}
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
-        <lang.Flag />
-        <span>{lang.code}</span>
+        <current.Flag />
+        <span>{current.code.toUpperCase()}</span>
         <ChevronDownIcon className={open ? 'lang__chevron is-open' : 'lang__chevron'} />
       </button>
       {open && (
@@ -41,15 +51,15 @@ function LanguageSelect() {
               <button
                 type="button"
                 role="option"
-                aria-selected={item.code === lang.code}
+                aria-selected={item.code === lang}
                 className="lang__option"
                 onClick={() => {
-                  setLang(item)
+                  setLang(item.code)
                   setOpen(false)
                 }}
               >
                 <item.Flag />
-                <span>{item.code}</span>
+                <span>{item.code.toUpperCase()}</span>
               </button>
             </li>
           ))}

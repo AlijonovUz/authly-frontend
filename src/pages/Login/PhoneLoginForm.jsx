@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { PhoneIcon, UserIcon } from '../../components/icons.jsx'
+import { useI18n } from '../../i18n/context.js'
 import { AltLoginButtons, Field, FormAlert } from './FormParts.jsx'
 
 const PHONE_PATTERN = /^\+998 \d{2} \d{3} \d{2} \d{2}$/
@@ -23,13 +24,11 @@ function PhoneLoginForm() {
   const [form, setForm] = useState({ firstName: '', lastName: '', phone: '' })
   const [phoneTouched, setPhoneTouched] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const [submitError, setSubmitError] = useState(null)
+  const [submitError, setSubmitError] = useState(null) // { message } — server matni, bo'lmasa null
+  const { t } = useI18n()
 
   const phoneValid = PHONE_PATTERN.test(form.phone)
-  const phoneError =
-    phoneTouched && form.phone && !phoneValid
-      ? 'Telefon raqami notoʻgʻri formatda. Namuna: +998 90 123 45 67'
-      : null
+  const phoneError = phoneTouched && form.phone && !phoneValid ? t('phone.invalid') : null
   const canSubmit =
     form.firstName.trim() && form.lastName.trim() && phoneValid && !submitting
 
@@ -45,10 +44,7 @@ function PhoneLoginForm() {
       // TODO: backend API bilan ulash
       await Promise.resolve(form)
     } catch (err) {
-      setSubmitError({
-        title: 'Roʻyxatdan oʻtishda xatolik',
-        message: err?.message ?? 'Nimadir xato ketdi. Qaytadan urinib koʻring.',
-      })
+      setSubmitError({ message: err?.message ?? null })
     } finally {
       setSubmitting(false)
     }
@@ -56,32 +52,37 @@ function PhoneLoginForm() {
 
   return (
     <form className="form" onSubmit={handleSubmit} noValidate>
-      <h2 className="form__title">Tizimga kirish</h2>
+      <h2 className="form__title">{t('login.title')}</h2>
 
-      {submitError && <FormAlert {...submitError} />}
+      {submitError && (
+        <FormAlert
+          title={t('phone.errorTitle')}
+          message={submitError.message ?? t('common.errorText')}
+        />
+      )}
 
       <div className="form__fields">
         <Field
           id="firstName"
-          label="Ism"
+          label={t('field.firstName')}
           icon={UserIcon}
-          placeholder="Ismingizni kiriting"
+          placeholder={t('field.firstNamePlaceholder')}
           autoComplete="given-name"
           value={form.firstName}
           onChange={update('firstName')}
         />
         <Field
           id="lastName"
-          label="Familiya"
+          label={t('field.lastName')}
           icon={UserIcon}
-          placeholder="Familiyangizni kiriting"
+          placeholder={t('field.lastNamePlaceholder')}
           autoComplete="family-name"
           value={form.lastName}
           onChange={update('lastName')}
         />
         <Field
           id="phone"
-          label="Telefon raqami"
+          label={t('field.phone')}
           icon={PhoneIcon}
           type="tel"
           inputMode="tel"
@@ -96,7 +97,7 @@ function PhoneLoginForm() {
       </div>
 
       <button type="submit" className="btn-primary" disabled={!canSubmit}>
-        Kirish
+        {t('login.submit')}
       </button>
 
       <AltLoginButtons />

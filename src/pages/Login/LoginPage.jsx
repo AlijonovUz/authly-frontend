@@ -5,6 +5,7 @@ import LanguageSelect from './LanguageSelect.jsx'
 import PasswordLoginForm from './PasswordLoginForm.jsx'
 import PhoneLoginForm from './PhoneLoginForm.jsx'
 import ProfileForm from './ProfileForm.jsx'
+import { useI18n } from '../../i18n/context.js'
 import './LoginPage.css'
 
 // Router ulanmaguncha hash orqali: "#/profile", "#/phone", "#/password"; qolgani — kod kiritish
@@ -16,6 +17,7 @@ const getRoute = () => {
 
 function LoginPage() {
   const [route, setRoute] = useState(getRoute)
+  const { t } = useI18n()
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRoute())
@@ -46,7 +48,7 @@ function LoginPage() {
 
         {forms[route]}
 
-        <p className="panel__footer">© 2026 Passport. Barcha huquqlar himoyalangan.</p>
+        <p className="panel__footer">{t('footer.rights')}</p>
       </section>
     </main>
   )

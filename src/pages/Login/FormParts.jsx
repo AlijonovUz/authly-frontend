@@ -4,6 +4,7 @@ import {
   MailIcon,
   SendIcon,
 } from '../../components/icons.jsx'
+import { useI18n } from '../../i18n/context.js'
 
 // error: string — qizil ramka + matn; true — faqat qizil ramka
 // warning: string — to'q sariq ogohlantirish (masalan, Caps Lock)
@@ -56,17 +57,18 @@ export function FormAlert({ variant = 'soft', title, message, extra }) {
 }
 
 export function AltLoginButtons() {
+  const { t } = useI18n()
   return (
     <div className="form__alt">
       <button type="button" className="btn-pill btn-telegram">
         <SendIcon />
-        <span className="label-full">Telegram bot orqali kirish</span>
-        <span className="label-short">Telegram orqali</span>
+        <span className="label-full">{t('login.telegramFull')}</span>
+        <span className="label-short">{t('login.telegramShort')}</span>
       </button>
       <button type="button" className="btn-pill btn-outline">
         <MailIcon />
-        <span className="label-full">Email orqali kirish</span>
-        <span className="label-short">Email orqali</span>
+        <span className="label-full">{t('login.emailFull')}</span>
+        <span className="label-short">{t('login.emailShort')}</span>
       </button>
     </div>
   )
