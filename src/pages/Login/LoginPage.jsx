@@ -38,7 +38,7 @@ function LoginPage() {
     <main className="login">
       {route === 'profile' ? <ServicesHero /> : <FeaturesHero />}
 
-      <section className="login__panel">
+      <section className={`login__panel login__panel--${route}`}>
         <header className="panel__top">
           <Brand />
           <LanguageSelect />

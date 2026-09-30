@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useSyncExternalStore } from 'react'
 import { saveProfile } from '../../api/auth.js'
 import { CalendarIcon, ChevronDownIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { REGIONS } from '../../data/regions.js'
@@ -7,6 +7,16 @@ import { Field } from './FormParts.jsx'
 const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
 const ThinUserIcon = thinIcon(UserIcon)
 const ThinCalendarIcon = thinIcon(CalendarIcon)
+
+// Telefonda select ichiga qisqa matn ("Tanlang") sig'adi — CSS'dagi 600px chegarasi bilan bir xil
+const PHONE_QUERY = '(max-width: 600px)'
+const subscribePhone = (onChange) => {
+  const mql = window.matchMedia(PHONE_QUERY)
+  mql.addEventListener('change', onChange)
+  return () => mql.removeEventListener('change', onChange)
+}
+const useIsPhone = () =>
+  useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE_QUERY).matches)
 
 // Kiritilgan qiymatni "KK.OO.YYYY" ko'rinishiga keltiradi
 function formatDate(value) {
@@ -110,6 +120,7 @@ function ProfileForm() {
   })
   const [photo, setPhoto] = useState(null) // { file, url }
   const [submitted, setSubmitted] = useState(false)
+  const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
 
   // Oldingi surat uchun yaratilgan vaqtinchalik manzilni bo'shatamiz
@@ -150,7 +161,7 @@ function ProfileForm() {
       <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
 
       <div className="profile__fields">
-        <div className="profile__row">
+        <div className="profile__row profile__row--names">
           <Field
             id="firstName"
             label="Ism"
@@ -177,7 +188,7 @@ function ProfileForm() {
           <SelectField
             id="region"
             label="Viloyat"
-            placeholder="Viloyatni tanlang"
+            placeholder={isPhone ? 'Tanlang' : 'Viloyatni tanlang'}
             options={REGIONS.map((r) => r.name)}
             value={form.region}
             onChange={(e) => setForm((f) => ({ ...f, region: e.target.value, district: '' }))}
@@ -186,7 +197,7 @@ function ProfileForm() {
           <SelectField
             id="district"
             label="Tuman"
-            placeholder="Tumanni tanlang"
+            placeholder={isPhone ? 'Tanlang' : 'Tumanni tanlang'}
             options={districts}
             value={form.district}
             onChange={update('district')}
