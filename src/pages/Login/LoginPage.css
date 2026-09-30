@@ -895,13 +895,14 @@
 /* Planshet va mobil: chap qism yashiriladi, brend yuqoriga chiqadi */
 @media (max-width: 1024px) {
   .login {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .login__hero {
     display: none;
   }
   .login__panel {
     min-height: 100vh;
+    min-height: 100dvh;
     margin: 0;
     padding: 24px 20px;
     border: 0;
@@ -958,33 +959,60 @@
   .label-short {
     display: inline;
   }
-  .form--code {
-    gap: 24px;
+  .form--code .form__heading {
+    margin-bottom: 8px;
+  }
+  .otp {
+    gap: 7px;
   }
   .otp__box {
     height: 64px;
     border-radius: 18px;
     font-size: 28px;
   }
-  .btn-google {
-    height: 56px;
-  }
-  .profile__fields {
-    gap: 16px;
-  }
   .field__select {
     font-size: 16px;
   }
-}
 
-@media (max-width: 420px) {
+  /* Profil: sarlavha tepada, tugma ekran pastida, footer ko'rinmaydi */
+  .login__panel--profile {
+    justify-content: flex-start;
+  }
+  .login__panel--profile .panel__footer {
+    display: none;
+  }
+  .form--profile {
+    flex: 1;
+    gap: 16px;
+    margin-top: 48px;
+  }
+  .form--profile .form__heading {
+    margin-bottom: 4px;
+  }
+  .form--profile .form__subtitle {
+    display: none;
+  }
+  .profile__fields {
+    gap: 12px;
+  }
   .profile__row {
+    gap: 12px;
+  }
+  .profile__row--names {
     grid-template-columns: 1fr;
+  }
+  .form--profile .btn-primary {
+    margin-top: auto;
+  }
+  /* Tugma va oxirgi maydon orasida kamida 24px qoladi */
+  .form--profile .profile__fields {
+    margin-bottom: 8px;
   }
 }
 
 @media (max-width: 340px) {
-  .form__alt {
+  .form__alt,
+  .profile__row {
     grid-template-columns: 1fr;
   }
 }
