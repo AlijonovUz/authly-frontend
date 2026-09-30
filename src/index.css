@@ -13,9 +13,18 @@
   --status-danger-strong: #e03131;
   --status-warning: #c2560c;
   --telegram: #229ed9;
+  --border-sub: #e2e6f2;
+  --bg-muted: #f4f4f4;
+  --accent-sub: #526ed3;
+  --accent-strong: #3f57b3;
+  --green-10: #2b9a66;
+  --red-10: #dc3e42;
+  --orange-9: #f2552c;
+  --card-dark: #222222;
 
   --font-onest: 'Onest', system-ui, sans-serif;
   --font-manrope: 'Manrope', system-ui, sans-serif;
+  --font-unbounded: 'Unbounded', system-ui, sans-serif;
 
   font-family: var(--font-onest);
   color: var(--text-strong);

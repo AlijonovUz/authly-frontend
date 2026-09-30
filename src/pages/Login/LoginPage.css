@@ -8,38 +8,32 @@
 /* ---------- Left: hero ---------- */
 
 .login__hero {
-  position: relative;
+  position: sticky;
+  top: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 48px;
   padding: 48px;
-  min-height: 100vh;
+  height: 100vh;
   overflow: hidden;
-  background: linear-gradient(
-    102.48deg,
-    #e6ecff -0.25%,
-    #a5b4fc 35.75%,
-    #526ed3 133.46%,
-    #3b4ddb 154.89%,
-    #1f2a7a 175.46%
-  );
+  background:
+    url('/left-panel-gradient.png') center / cover no-repeat,
+    linear-gradient(
+      102.48deg,
+      #e6ecff -0.25%,
+      #a5b4fc 35.75%,
+      #526ed3 133.46%,
+      #3b4ddb 154.89%,
+      #1f2a7a 175.46%
+    );
 }
 
-.login__hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(
-    60% 45% at 0% 55%,
-    rgba(255, 255, 255, 0.35),
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
-}
-
-.login__hero > * {
-  position: relative;
+/* Profil sahifasi: sarlavha tepada, ostida aylantiriladigan xizmatlar */
+.login__hero--services {
+  justify-content: flex-start;
+  gap: 32px;
+  padding: 68px 48px 0;
 }
 
 .brand {
@@ -56,7 +50,7 @@
 .hero__intro {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   max-width: 664px;
 }
 
@@ -91,7 +85,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 140px;
+  height: 140px;
   padding: 16px;
   border-radius: 16px;
   border: 1px solid #ffffff1a;
@@ -136,15 +130,114 @@
   line-height: 140%;
 }
 
+/* Xizmatlar kartalari */
+
+.services {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
+  gap: 12.76px 18.34px;
+  width: 100%;
+  max-width: 638px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 0 48px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.services::-webkit-scrollbar {
+  display: none;
+}
+
+.service {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  height: 100%;
+  min-height: 135.57px;
+  padding: 12.76px;
+  border-radius: 10.63px;
+  background: var(--bg-surface);
+  color: var(--text-strong);
+  text-decoration: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.service:hover {
+  box-shadow: 0 8px 20px #1f2a7a29;
+}
+
+.service:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: -2px;
+}
+
+.service__title {
+  font-family: var(--font-unbounded);
+  font-weight: 600;
+  font-size: 12.76px;
+  line-height: 125%;
+}
+
+.service__text {
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 7.97px;
+  line-height: 9.04px;
+}
+
+.service__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.service__link {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-manrope);
+  font-weight: 600;
+  font-size: 9.04px;
+  line-height: 14.89px;
+  color: var(--accent-strong);
+  text-decoration: underline;
+}
+
+.service__arrow {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 29.77px;
+  height: 29.77px;
+  border: 0.53px solid #333333;
+  border-radius: 15.42px;
+  background: var(--card-dark);
+  color: #fff;
+}
+
 /* ---------- Right: panel ---------- */
 
 .login__panel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
-  padding: 20px 48px;
-  min-height: 100vh;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: calc(100vh - 40px);
+  margin: 20px 0 20px 20px;
+  padding: 48px 64px;
+  border: 1px solid var(--border-sub);
+  border-radius: 24px;
+  background: var(--bg-surface);
 }
 
 .panel__top {
@@ -153,7 +246,6 @@
   justify-content: flex-end;
   width: 100%;
   max-width: 532px;
-  padding-top: 48px;
 }
 
 /* Brend panelda faqat mobil ko'rinishda chiqadi */
@@ -168,7 +260,6 @@
   line-height: 100%;
   text-align: center;
   color: var(--text-faint);
-  padding-bottom: 56px;
 }
 
 /* Language selector */
@@ -246,7 +337,6 @@
   flex-direction: column;
   width: 100%;
   max-width: 532px;
-  margin: auto 0;
 }
 
 .form__title {
@@ -256,6 +346,279 @@
   line-height: 40px;
   color: var(--text-strong);
   margin-bottom: 32px;
+}
+
+.form__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form__heading .form__title {
+  margin-bottom: 0;
+}
+
+.form__subtitle {
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--text-muted);
+}
+
+.form__subtitle a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.form__subtitle a:hover {
+  color: var(--accent-strong);
+}
+
+.form--code {
+  gap: 32px;
+}
+
+.form--profile {
+  gap: 24px;
+}
+
+.form--profile .form__heading {
+  margin-bottom: 8px;
+}
+
+/* Tasdiqlash kodi */
+
+.otp {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.otp__box {
+  flex: 0 1 76px;
+  width: 76px;
+  min-width: 0;
+  height: 84px;
+  padding: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: 25px;
+  outline: 0;
+  background: var(--bg-subtle);
+  font-family: var(--font-manrope);
+  font-weight: 800;
+  font-size: 36px;
+  line-height: 40px;
+  text-align: center;
+  color: var(--text-strong);
+  caret-color: var(--accent-sub);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* 2px ramka: 1px border + 1px ichki soya — o'lcham siljimaydi */
+.otp__box:focus,
+.otp__box.is-filled {
+  border-color: var(--accent-sub);
+  box-shadow: inset 0 0 0 1px var(--accent-sub);
+}
+
+.otp__box.is-success {
+  border-color: var(--green-10);
+  box-shadow: inset 0 0 0 1px var(--green-10);
+}
+
+.otp__box.is-error {
+  border-color: var(--red-10);
+  box-shadow: inset 0 0 0 1px var(--red-10);
+}
+
+.form__alt-group {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--text-faint);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.btn-google {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 60px;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--bg-muted);
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 100%;
+  color: var(--text-strong);
+  transition: background-color 0.15s ease;
+}
+
+.btn-google:hover {
+  background: #ececec;
+}
+
+/* Profil */
+
+.avatar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar__picker {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.avatar__picker:focus-within {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+.avatar__circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: 50%;
+  background: var(--bg-subtle);
+  color: var(--text-faint);
+}
+
+.avatar__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar__badge {
+  position: absolute;
+  right: -2px;
+  bottom: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--bg-surface);
+  border-radius: 50%;
+  background: var(--accent-default);
+  color: var(--text-on-accent);
+}
+
+.avatar__title,
+.avatar__hint {
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.avatar__title {
+  color: var(--text-strong);
+}
+
+.avatar__hint {
+  margin-top: 2px;
+  color: var(--text-faint);
+}
+
+.profile__fields {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile__row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.field__control.field__control--select {
+  position: relative;
+  padding: 0;
+}
+
+.field__select {
+  width: 100%;
+  height: 100%;
+  padding: 0 44px 0 16px;
+  border: 0;
+  border-radius: inherit;
+  outline: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 15px;
+  line-height: 24px;
+  color: var(--text-strong);
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.field__select.is-placeholder {
+  color: var(--text-faint);
+}
+
+.field__select:disabled {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+.field__select option {
+  color: var(--text-strong);
+}
+
+.field__chevron {
+  position: absolute;
+  right: 16px;
+  color: var(--text-strong);
+  pointer-events: none;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 .form__fields {
@@ -439,6 +802,12 @@
   transition: background-color 0.15s ease;
 }
 
+.btn-primary--lg {
+  height: 60px;
+  font-family: var(--font-manrope);
+  font-size: 16px;
+}
+
 .btn-primary:hover:not(:disabled) {
   background: #354a9c;
 }
@@ -494,6 +863,7 @@
 
 .btn-primary:focus-visible,
 .btn-pill:focus-visible,
+.btn-google:focus-visible,
 .lang__trigger:focus-visible,
 .lang__option:focus-visible {
   outline: 2px solid var(--accent-default);
@@ -514,8 +884,11 @@
   .hero__title {
     font-size: 36px;
   }
+  .login__hero--services {
+    padding: 56px 32px 0;
+  }
   .login__panel {
-    padding: 20px 32px;
+    padding: 40px 32px;
   }
 }
 
@@ -528,21 +901,21 @@
     display: none;
   }
   .login__panel {
-    padding: 16px 20px;
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px 20px;
+    border: 0;
+    border-radius: 0;
   }
   .panel__top {
     justify-content: space-between;
     gap: 12px;
-    padding-top: 8px;
   }
   .panel__top .brand {
     display: flex;
   }
   .panel__top .brand__logo {
     height: 36px;
-  }
-  .panel__footer {
-    padding-bottom: 24px;
   }
 }
 
@@ -585,8 +958,28 @@
   .label-short {
     display: inline;
   }
-  .panel__footer {
-    padding-bottom: 16px;
+  .form--code {
+    gap: 24px;
+  }
+  .otp__box {
+    height: 64px;
+    border-radius: 18px;
+    font-size: 28px;
+  }
+  .btn-google {
+    height: 56px;
+  }
+  .profile__fields {
+    gap: 16px;
+  }
+  .field__select {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .profile__row {
+    grid-template-columns: 1fr;
   }
 }
 

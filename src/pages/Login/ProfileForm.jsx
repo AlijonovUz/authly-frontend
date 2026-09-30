@@ -1,0 +1,219 @@
+import { useEffect, useState } from 'react'
+import { saveProfile } from '../../api/auth.js'
+import { CalendarIcon, ChevronDownIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
+import { REGIONS } from '../../data/regions.js'
+import { Field } from './FormParts.jsx'
+
+const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
+const ThinUserIcon = thinIcon(UserIcon)
+const ThinCalendarIcon = thinIcon(CalendarIcon)
+
+// Kiritilgan qiymatni "KK.OO.YYYY" ko'rinishiga keltiradi
+function formatDate(value) {
+  const digits = value.replace(/\D/g, '').slice(0, 8)
+  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)].filter(Boolean).join('.')
+}
+
+function isValidBirthDate(value) {
+  const match = /^(\d{2})\.(\d{2})\.(\d{4})$/.exec(value)
+  if (!match) return false
+  const [, d, m, y] = match.map(Number)
+  const date = new Date(y, m - 1, d)
+  return (
+    date.getFullYear() === y &&
+    date.getMonth() === m - 1 &&
+    date.getDate() === d &&
+    y >= 1900 &&
+    date <= new Date()
+  )
+}
+
+function validate(form) {
+  const errors = {}
+  if (!form.firstName.trim()) errors.firstName = true
+  if (!form.lastName.trim()) errors.lastName = true
+  if (!form.region) errors.region = true
+  if (!form.district) errors.district = true
+  if (!isValidBirthDate(form.birthDate)) {
+    errors.birthDate = form.birthDate ? 'Sana notoʻgʻri kiritilgan' : true
+  }
+  return errors
+}
+
+function SelectField({ id, label, placeholder, options, value, onChange, error, disabled }) {
+  return (
+    <div className="field">
+      <label className="field__label" htmlFor={id}>
+        {label}
+      </label>
+      <div className={error ? 'field__control field__control--select has-error' : 'field__control field__control--select'}>
+        <select
+          id={id}
+          className={value ? 'field__select' : 'field__select is-placeholder'}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          aria-invalid={Boolean(error)}
+        >
+          <option value="" disabled>
+            {placeholder}
+          </option>
+          {options.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+        <ChevronDownIcon className="field__chevron" />
+      </div>
+    </div>
+  )
+}
+
+function AvatarPicker({ photoUrl, onChange }) {
+  return (
+    <div className="avatar">
+      <label className="avatar__picker">
+        <input
+          type="file"
+          accept="image/*"
+          className="visually-hidden"
+          onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        />
+        <span className="avatar__circle">
+          {photoUrl ? (
+            <img src={photoUrl} alt="Profil surati" className="avatar__img" />
+          ) : (
+            <UserIcon width="28" height="28" strokeWidth={1.5} />
+          )}
+        </span>
+        <span className="avatar__badge" aria-hidden="true">
+          <PlusIcon />
+        </span>
+        <span className="visually-hidden">Profil suratini yuklash</span>
+      </label>
+      <div className="avatar__text">
+        <p className="avatar__title">Profil surati</p>
+        <p className="avatar__hint">Ixtiyoriy</p>
+      </div>
+    </div>
+  )
+}
+
+function ProfileForm() {
+  const [form, setForm] = useState({
+    firstName: '',
+    lastName: '',
+    region: '',
+    district: '',
+    birthDate: '',
+  })
+  const [photo, setPhoto] = useState(null) // { file, url }
+  const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+
+  // Oldingi surat uchun yaratilgan vaqtinchalik manzilni bo'shatamiz
+  useEffect(() => {
+    if (!photo) return
+    return () => URL.revokeObjectURL(photo.url)
+  }, [photo])
+
+  const pickPhoto = (file) => {
+    if (file) setPhoto({ file, url: URL.createObjectURL(file) })
+  }
+
+  const errors = submitted ? validate(form) : {}
+  const districts = REGIONS.find((r) => r.name === form.region)?.districts ?? []
+
+  const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setSubmitted(true)
+    if (Object.keys(validate(form)).length > 0 || submitting) return
+    setSubmitting(true)
+    try {
+      // TODO: backend tayyor bo'lgach, keyingi sahifaga yo'naltirish
+      await saveProfile({ ...form, photo: photo?.file ?? null })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form className="form form--profile" onSubmit={handleSubmit} noValidate>
+      <div className="form__heading">
+        <h2 className="form__title">Profilingizni toʻldiring</h2>
+        <p className="form__subtitle">Xizmatlardan foydalanish uchun maʼlumotlaringizni kiriting</p>
+      </div>
+
+      <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
+
+      <div className="profile__fields">
+        <div className="profile__row">
+          <Field
+            id="firstName"
+            label="Ism"
+            icon={ThinUserIcon}
+            placeholder="Ismingizni kiriting"
+            autoComplete="given-name"
+            value={form.firstName}
+            onChange={update('firstName')}
+            error={errors.firstName}
+          />
+          <Field
+            id="lastName"
+            label="Familiya"
+            icon={ThinUserIcon}
+            placeholder="Familiyangizni kiriting"
+            autoComplete="family-name"
+            value={form.lastName}
+            onChange={update('lastName')}
+            error={errors.lastName}
+          />
+        </div>
+
+        <div className="profile__row">
+          <SelectField
+            id="region"
+            label="Viloyat"
+            placeholder="Viloyatni tanlang"
+            options={REGIONS.map((r) => r.name)}
+            value={form.region}
+            onChange={(e) => setForm((f) => ({ ...f, region: e.target.value, district: '' }))}
+            error={errors.region}
+          />
+          <SelectField
+            id="district"
+            label="Tuman"
+            placeholder="Tumanni tanlang"
+            options={districts}
+            value={form.district}
+            onChange={update('district')}
+            error={errors.district}
+            disabled={!form.region}
+          />
+        </div>
+
+        <Field
+          id="birthDate"
+          label="Tugʻilgan sana"
+          icon={ThinCalendarIcon}
+          inputMode="numeric"
+          placeholder="KK.OO.YYYY"
+          autoComplete="bday"
+          maxLength={10}
+          value={form.birthDate}
+          onChange={(e) => setForm((f) => ({ ...f, birthDate: formatDate(e.target.value) }))}
+          error={errors.birthDate}
+        />
+      </div>
+
+      <button type="submit" className="btn-primary btn-primary--lg" disabled={submitting}>
+        Davom etish
+      </button>
+    </form>
+  )
+}
+
+export default ProfileForm

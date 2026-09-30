@@ -1,57 +1,42 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import CodeLoginForm from './CodeLoginForm.jsx'
+import { Brand, FeaturesHero, ServicesHero } from './Hero.jsx'
 import LanguageSelect from './LanguageSelect.jsx'
 import PasswordLoginForm from './PasswordLoginForm.jsx'
 import PhoneLoginForm from './PhoneLoginForm.jsx'
+import ProfileForm from './ProfileForm.jsx'
 import './LoginPage.css'
 
-const FEATURES = [
-  { title: 'Xavfsiz', text: 'Maʼlumotlaringiz shifrlangan holda saqlanadi.' },
-  { title: 'Tezkor', text: 'Bir marta roʻyxatdan oʻting, barcha xizmatlarga kiring.' },
-  { title: 'Ishonchli', text: 'Telegram bot yoki email orqali xavfsiz tasdiqlash.' },
-]
-
-// Router ulanmaguncha: "#/password" — login/parol formasi, qolgani — telefon formasi
-const getMode = () => (window.location.hash === '#/password' ? 'password' : 'phone')
-
-function Brand() {
-  return (
-    <div className="brand">
-      <img className="brand__logo" src="/logo.svg" alt="Raqamli Nazorat" width="210" height="44" />
-    </div>
-  )
+// Router ulanmaguncha hash orqali: "#/profile", "#/phone", "#/password"; qolgani — kod kiritish
+const ROUTES = ['code', 'profile', 'phone', 'password']
+const getRoute = () => {
+  const route = window.location.hash.replace(/^#\//, '')
+  return ROUTES.includes(route) ? route : 'code'
 }
 
 function LoginPage() {
-  const [mode, setMode] = useState(getMode)
+  const [route, setRoute] = useState(getRoute)
 
   useEffect(() => {
-    const onHashChange = () => setMode(getMode())
+    const onHashChange = () => setRoute(getRoute())
     window.addEventListener('hashchange', onHashChange)
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
+  const goToProfile = useCallback(() => {
+    window.location.hash = '#/profile'
+  }, [])
+
+  const forms = {
+    code: <CodeLoginForm onVerified={goToProfile} />,
+    profile: <ProfileForm />,
+    phone: <PhoneLoginForm />,
+    password: <PasswordLoginForm />,
+  }
+
   return (
     <main className="login">
-      <section className="login__hero">
-        <Brand />
-
-        <div className="hero__intro">
-          <h1 className="hero__title">Passport tizimiga xush kelibsiz</h1>
-          <p className="hero__subtitle">
-            Yagona raqamli profilingiz orqali barcha xizmatlardan xavfsiz va tez foydalaning.
-          </p>
-        </div>
-
-        <ul className="features">
-          {FEATURES.map((f, i) => (
-            <li key={f.title} className={i === 0 ? 'feature is-active' : 'feature'}>
-              <span className="feature__num">{i + 1}</span>
-              <h3 className="feature__title">{f.title}</h3>
-              <p className="feature__text">{f.text}</p>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {route === 'profile' ? <ServicesHero /> : <FeaturesHero />}
 
       <section className="login__panel">
         <header className="panel__top">
@@ -59,7 +44,7 @@ function LoginPage() {
           <LanguageSelect />
         </header>
 
-        {mode === 'password' ? <PasswordLoginForm /> : <PhoneLoginForm />}
+        {forms[route]}
 
         <p className="panel__footer">© 2026 Passport. Barcha huquqlar himoyalangan.</p>
       </section>
