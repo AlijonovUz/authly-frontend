@@ -29,11 +29,13 @@
     );
 }
 
-/* Profil sahifasi: sarlavha tepada, ostida aylantiriladigan xizmatlar */
+/* Profil sahifasi: sarlavha tepada, ostida aylantiriladigan xizmatlar.
+   Figma'da (760px panel) chapdan 48px, o'ngdan 74px bo'sh joy qoladi. */
 .login__hero--services {
   justify-content: flex-start;
   gap: 32px;
-  padding: 68px 48px 0;
+  padding: 68px 74px 0 48px;
+  container-type: inline-size;
 }
 
 .brand {
@@ -134,14 +136,15 @@
 
 /* Xizmatlar kartalari */
 
+/* 3 ustun: har biri 33.33% (oradagi masofa hisobiga teng qisqaradi).
+   Oraliqlar ro'yxat kengligiga nisbatan: 12.76 / 638 va 18.34 / 638 */
 .services {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: start;
-  gap: 12.76px 18.34px;
+  gap: 2cqw 2.875cqw;
   width: 100%;
-  max-width: 638px;
   min-height: 0;
   margin: 0;
   padding: 0 0 48px;
@@ -155,48 +158,90 @@
   display: none;
 }
 
+/* Karta ichidagi o'lchamlar karta kengligiga bog'langan (Figma'da karta 200px) */
+.services > li {
+  container-type: inline-size;
+  animation: service-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(min(var(--i, 0), 11) * 45ms);
+}
+
+@keyframes service-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* --u: Figma'dagi 1px. Karta 200px dan kengaysa mutanosib kattalashadi, toraysa kichraymaydi */
 .service {
+  --u: max(1px, 0.5cqw);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: calc(6 * var(--u));
   height: 100%;
-  min-height: 135.57px;
-  padding: 12.76px;
-  border-radius: 10.63px;
+  min-height: calc(135.57 * var(--u));
+  padding: calc(12.76 * var(--u));
+  border-radius: calc(10.63 * var(--u));
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: var(--bg-surface);
   color: var(--text-strong);
   text-decoration: none;
-  transition: box-shadow 0.15s ease;
+  transition: color 0.5s ease, box-shadow 0.5s ease;
 }
 
-.service:hover {
+/* Ko'k fon sichqoncha kirgan nuqtadan (--x, --y) doira bo'lib yoyiladi va
+   chiqqan nuqtasiga qarab yig'iladi. Nuqtani Hero.jsx qo'yadi; klaviaturada — markazdan. */
+.service::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: var(--y, 50%);
+  left: var(--x, 50%);
+  width: 300%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--accent-strong);
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.service:hover::before,
+.service:focus-visible::before {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.service:hover,
+.service:focus-visible {
+  color: var(--text-on-accent);
   box-shadow: 0 8px 20px #1f2a7a29;
 }
 
 .service:focus-visible {
-  outline: 2px solid var(--accent-strong);
-  outline-offset: -2px;
+  outline: 2px solid var(--bg-surface);
+  outline-offset: -4px;
 }
 
 .service__title {
   font-family: var(--font-unbounded);
   font-weight: 600;
-  font-size: 12.76px;
+  font-size: calc(12.76 * var(--u));
   line-height: 125%;
 }
 
 .service__text {
   font-family: var(--font-manrope);
   font-weight: 500;
-  font-size: 7.97px;
-  line-height: 9.04px;
+  font-size: calc(7.97 * var(--u));
+  line-height: 113.4%;
 }
 
 .service__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: calc(8 * var(--u));
   margin-top: auto;
 }
 
@@ -207,10 +252,11 @@
   white-space: nowrap;
   font-family: var(--font-manrope);
   font-weight: 600;
-  font-size: 9.04px;
-  line-height: 14.89px;
+  font-size: calc(9.04 * var(--u));
+  line-height: 164.7%;
   color: var(--accent-strong);
   text-decoration: underline;
+  transition: color 0.5s ease;
 }
 
 .service__arrow {
@@ -218,12 +264,46 @@
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 29.77px;
-  height: 29.77px;
+  width: calc(29.77 * var(--u));
+  height: calc(29.77 * var(--u));
   border: 0.53px solid #333333;
-  border-radius: 15.42px;
+  border-radius: 50%;
   background: var(--card-dark);
   color: #fff;
+  transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease;
+}
+
+.service__arrow svg {
+  width: calc(12 * var(--u));
+  height: calc(12 * var(--u));
+  transition: transform 0.5s ease;
+}
+
+/* Hover: ko'k karta, oq tugma, strelka o'ngga buriladi (↗ → →) */
+.service:hover .service__link,
+.service:focus-visible .service__link {
+  color: var(--text-on-accent);
+}
+
+.service:hover .service__arrow,
+.service:focus-visible .service__arrow {
+  border-color: var(--bg-surface);
+  background: var(--bg-surface);
+  color: #000;
+}
+
+.service:hover .service__arrow svg,
+.service:focus-visible .service__arrow svg {
+  transform: rotate(45deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .services > li {
+    animation: none;
+  }
+  .service::before {
+    transition: none;
+  }
 }
 
 /* ---------- Right: panel ---------- */
@@ -309,6 +389,15 @@
   border-radius: 12px;
   background: var(--bg-surface);
   box-shadow: 0 8px 24px #0b192f1f;
+  transform-origin: top right;
+  animation: lang-menu-in 0.16s ease-out;
+}
+
+@keyframes lang-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
 }
 
 .lang__option {
@@ -886,7 +975,7 @@
     font-size: 36px;
   }
   .login__hero--services {
-    padding: 56px 32px 0;
+    padding: 56px 48px 0 32px;
   }
   .login__panel {
     padding: 40px 32px;

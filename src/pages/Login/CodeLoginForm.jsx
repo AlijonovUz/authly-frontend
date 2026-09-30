@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { verifyCode } from '../../api/auth.js'
 import { GoogleIcon } from '../../components/icons.jsx'
 import Toast from '../../components/Toast.jsx'
+import { useI18n } from '../../i18n/context.js'
 
 const LENGTH = 6
 const SUCCESS_DELAY = 700
@@ -12,6 +13,7 @@ function CodeLoginForm({ onVerified }) {
   const [status, setStatus] = useState('idle')
   const [toastOpen, setToastOpen] = useState(false)
   const inputs = useRef([])
+  const { t } = useI18n()
 
   const locked = status === 'checking' || status === 'success'
   const closeToast = useCallback(() => setToastOpen(false), [])
@@ -95,16 +97,18 @@ function CodeLoginForm({ onVerified }) {
   return (
     <div className="form form--code">
       <div className="form__heading">
-        <h2 className="form__title">Kodni kiriting</h2>
+        <h2 className="form__title">{t('code.title')}</h2>
+        {/* Havola o'rni tilga qarab o'zgaradi: matn ikki bo'lakka ajratilgan */}
         <p className="form__subtitle">
+          {t('code.subtitleBefore')}{' '}
           <a href="https://t.me/raqamlibot" target="_blank" rel="noreferrer">
             @raqamlibot
           </a>{' '}
-          telegram botiga kiring va 1 daqiqalik kodingizni oling.
+          {t('code.subtitleAfter')}
         </p>
       </div>
 
-      <div className="otp" role="group" aria-label="Tasdiqlash kodi" aria-busy={status === 'checking'}>
+      <div className="otp" role="group" aria-label={t('code.groupLabel')} aria-busy={status === 'checking'}>
         {digits.map((value, i) => (
           <input
             key={i}
@@ -115,7 +119,7 @@ function CodeLoginForm({ onVerified }) {
             type="text"
             inputMode="numeric"
             autoComplete={i === 0 ? 'one-time-code' : 'off'}
-            aria-label={`${i + 1}-raqam`}
+            aria-label={t('code.digitLabel', { n: i + 1 })}
             aria-invalid={status === 'error'}
             value={value}
             readOnly={locked}
@@ -128,18 +132,18 @@ function CodeLoginForm({ onVerified }) {
 
       <div className="form__alt-group">
         <div className="divider">
-          <span>yoki</span>
+          <span>{t('common.or')}</span>
         </div>
 
         {/* TODO: Google OAuth manzilini ulash */}
         <button type="button" className="btn-google">
           <GoogleIcon />
-          Google orqali davom etish
+          {t('code.google')}
         </button>
       </div>
 
       {toastOpen && (
-        <Toast title="Yaroqsiz kod" message="Iltimos qayta urinib koʻring" onClose={closeToast} />
+        <Toast title={t('code.invalidTitle')} message={t('code.invalidText')} onClose={closeToast} />
       )}
     </div>
   )

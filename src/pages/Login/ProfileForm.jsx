@@ -2,6 +2,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { saveProfile } from '../../api/auth.js'
 import { CalendarIcon, ChevronDownIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { REGIONS } from '../../data/regions.js'
+import { useI18n } from '../../i18n/context.js'
 import { Field } from './FormParts.jsx'
 
 const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
@@ -38,14 +39,14 @@ function isValidBirthDate(value) {
   )
 }
 
-function validate(form) {
+function validate(form, t) {
   const errors = {}
   if (!form.firstName.trim()) errors.firstName = true
   if (!form.lastName.trim()) errors.lastName = true
   if (!form.region) errors.region = true
   if (!form.district) errors.district = true
   if (!isValidBirthDate(form.birthDate)) {
-    errors.birthDate = form.birthDate ? 'Sana notoʻgʻri kiritilgan' : true
+    errors.birthDate = form.birthDate ? t('profile.birthDateInvalid') : true
   }
   return errors
 }
@@ -81,6 +82,7 @@ function SelectField({ id, label, placeholder, options, value, onChange, error, 
 }
 
 function AvatarPicker({ photoUrl, onChange }) {
+  const { t } = useI18n()
   return (
     <div className="avatar">
       <label className="avatar__picker">
@@ -92,7 +94,7 @@ function AvatarPicker({ photoUrl, onChange }) {
         />
         <span className="avatar__circle">
           {photoUrl ? (
-            <img src={photoUrl} alt="Profil surati" className="avatar__img" />
+            <img src={photoUrl} alt={t('profile.photo')} className="avatar__img" />
           ) : (
             <UserIcon width="28" height="28" strokeWidth={1.5} />
           )}
@@ -100,11 +102,11 @@ function AvatarPicker({ photoUrl, onChange }) {
         <span className="avatar__badge" aria-hidden="true">
           <PlusIcon />
         </span>
-        <span className="visually-hidden">Profil suratini yuklash</span>
+        <span className="visually-hidden">{t('profile.uploadPhoto')}</span>
       </label>
       <div className="avatar__text">
-        <p className="avatar__title">Profil surati</p>
-        <p className="avatar__hint">Ixtiyoriy</p>
+        <p className="avatar__title">{t('profile.photo')}</p>
+        <p className="avatar__hint">{t('profile.optional')}</p>
       </div>
     </div>
   )
@@ -122,6 +124,7 @@ function ProfileForm() {
   const [submitted, setSubmitted] = useState(false)
   const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
+  const { t } = useI18n()
 
   // Oldingi surat uchun yaratilgan vaqtinchalik manzilni bo'shatamiz
   useEffect(() => {
@@ -133,7 +136,7 @@ function ProfileForm() {
     if (file) setPhoto({ file, url: URL.createObjectURL(file) })
   }
 
-  const errors = submitted ? validate(form) : {}
+  const errors = submitted ? validate(form, t) : {}
   const districts = REGIONS.find((r) => r.name === form.region)?.districts ?? []
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
@@ -141,7 +144,7 @@ function ProfileForm() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitted(true)
-    if (Object.keys(validate(form)).length > 0 || submitting) return
+    if (Object.keys(validate(form, t)).length > 0 || submitting) return
     setSubmitting(true)
     try {
       // TODO: backend tayyor bo'lgach, keyingi sahifaga yo'naltirish
@@ -154,8 +157,8 @@ function ProfileForm() {
   return (
     <form className="form form--profile" onSubmit={handleSubmit} noValidate>
       <div className="form__heading">
-        <h2 className="form__title">Profilingizni toʻldiring</h2>
-        <p className="form__subtitle">Xizmatlardan foydalanish uchun maʼlumotlaringizni kiriting</p>
+        <h2 className="form__title">{t('profile.title')}</h2>
+        <p className="form__subtitle">{t('profile.subtitle')}</p>
       </div>
 
       <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
@@ -164,9 +167,9 @@ function ProfileForm() {
         <div className="profile__row profile__row--names">
           <Field
             id="firstName"
-            label="Ism"
+            label={t('field.firstName')}
             icon={ThinUserIcon}
-            placeholder="Ismingizni kiriting"
+            placeholder={t('field.firstNamePlaceholder')}
             autoComplete="given-name"
             value={form.firstName}
             onChange={update('firstName')}
@@ -174,9 +177,9 @@ function ProfileForm() {
           />
           <Field
             id="lastName"
-            label="Familiya"
+            label={t('field.lastName')}
             icon={ThinUserIcon}
-            placeholder="Familiyangizni kiriting"
+            placeholder={t('field.lastNamePlaceholder')}
             autoComplete="family-name"
             value={form.lastName}
             onChange={update('lastName')}
@@ -187,8 +190,8 @@ function ProfileForm() {
         <div className="profile__row">
           <SelectField
             id="region"
-            label="Viloyat"
-            placeholder={isPhone ? 'Tanlang' : 'Viloyatni tanlang'}
+            label={t('field.region')}
+            placeholder={t(isPhone ? 'common.select' : 'field.regionPlaceholder')}
             options={REGIONS.map((r) => r.name)}
             value={form.region}
             onChange={(e) => setForm((f) => ({ ...f, region: e.target.value, district: '' }))}
@@ -196,8 +199,8 @@ function ProfileForm() {
           />
           <SelectField
             id="district"
-            label="Tuman"
-            placeholder={isPhone ? 'Tanlang' : 'Tumanni tanlang'}
+            label={t('field.district')}
+            placeholder={t(isPhone ? 'common.select' : 'field.districtPlaceholder')}
             options={districts}
             value={form.district}
             onChange={update('district')}
@@ -208,10 +211,10 @@ function ProfileForm() {
 
         <Field
           id="birthDate"
-          label="Tugʻilgan sana"
+          label={t('field.birthDate')}
           icon={ThinCalendarIcon}
           inputMode="numeric"
-          placeholder="KK.OO.YYYY"
+          placeholder={t('field.birthDatePlaceholder')}
           autoComplete="bday"
           maxLength={10}
           value={form.birthDate}
@@ -221,7 +224,7 @@ function ProfileForm() {
       </div>
 
       <button type="submit" className="btn-primary btn-primary--lg" disabled={submitting}>
-        Davom etish
+        {t('profile.submit')}
       </button>
     </form>
   )
