@@ -2,15 +2,15 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { getMe, saveProfile } from '../../api/auth.js'
 import { mediaUrl } from '../../api/client.js'
 import { getDistricts, getRegions } from '../../api/references.js'
-import { CalendarIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
+import { PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { Field, FormAlert } from './FormParts.jsx'
+import DateField from './DateField.jsx'
 import RegisteredView from './RegisteredView.jsx'
 import SearchSelect from './SearchSelect.jsx'
 
 const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
 const ThinUserIcon = thinIcon(UserIcon)
-const ThinCalendarIcon = thinIcon(CalendarIcon)
 
 // Telefonda select ichiga qisqa matn ("Tanlang") sig'adi — CSS'dagi 600px chegarasi bilan bir xil
 const PHONE_QUERY = '(max-width: 600px)'
@@ -21,12 +21,6 @@ const subscribePhone = (onChange) => {
 }
 const useIsPhone = () =>
   useSyncExternalStore(subscribePhone, () => window.matchMedia(PHONE_QUERY).matches)
-
-// Kiritilgan qiymatni "KK.OO.YYYY" ko'rinishiga keltiradi
-function formatDate(value) {
-  const digits = value.replace(/\D/g, '').slice(0, 8)
-  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)].filter(Boolean).join('.')
-}
 
 // Backend sanasi "YYYY-MM-DD" → "KK.OO.YYYY"
 function fromApiDate(value) {
@@ -251,16 +245,12 @@ function ProfileForm() {
           />
         </div>
 
-        <Field
+        <DateField
           id="birthDate"
           label={t('field.birthDate')}
-          icon={ThinCalendarIcon}
-          inputMode="numeric"
           placeholder={t('field.birthDatePlaceholder')}
-          autoComplete="bday"
-          maxLength={10}
           value={form.birthDate}
-          onChange={(e) => setForm((f) => ({ ...f, birthDate: formatDate(e.target.value) }))}
+          onChange={(birthDate) => setForm((f) => ({ ...f, birthDate }))}
           error={errors.birthDate}
         />
       </div>

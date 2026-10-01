@@ -884,9 +884,281 @@
   box-shadow: 0 0 0 3px #3f57b31f;
 }
 
+/* Sana maydoni va kalendar */
+
+.date-field {
+  position: relative;
+}
+
+.field__control.is-open {
+  border-color: var(--accent-default);
+  box-shadow: 0 0 0 3px #3f57b31f;
+}
+
+.field__icon-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  margin: -4px;
+  padding: 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.field__icon-button:hover .field__icon,
+.field__control.is-open .field__icon {
+  color: var(--accent-default);
+}
+
+.field__icon-button:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
+}
+
+.calendar {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  width: 300px;
+  padding: 12px;
+  border: 1px solid #e4e7ee;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  box-shadow: 0 12px 32px #0b192f24;
+  font-family: var(--font-manrope);
+  user-select: none;
+  transform-origin: top left;
+  animation: lang-menu-in 0.16s ease-out;
+}
+
+.calendar--up {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform-origin: bottom left;
+  animation-name: search-select-up;
+}
+
+.calendar__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.calendar__nav {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.calendar__nav:hover:not(:disabled),
+.calendar__title:hover {
+  background: var(--bg-subtle);
+}
+
+.calendar__nav:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.calendar__nav-prev {
+  transform: rotate(90deg);
+}
+
+.calendar__nav-next {
+  transform: rotate(-90deg);
+}
+
+.calendar__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.calendar__title svg {
+  color: var(--text-faint);
+  transition: transform 0.15s ease;
+}
+
+.calendar__title svg.is-open {
+  transform: rotate(180deg);
+}
+
+.calendar__picker {
+  display: flex;
+  gap: 8px;
+  height: 262px;
+}
+
+.calendar__list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  max-height: 100%;
+  overflow-y: auto;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  scrollbar-width: thin;
+}
+
+.calendar__list--years {
+  flex: 0 0 84px;
+}
+
+.calendar__option {
+  flex-shrink: 0;
+  padding: 7px 12px;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-strong);
+  text-align: left;
+  cursor: pointer;
+}
+
+.calendar__option:hover:not(:disabled) {
+  background: var(--bg-subtle);
+}
+
+.calendar__option.is-selected {
+  background: #eef1fb;
+  font-weight: 700;
+  color: var(--accent-default);
+}
+
+.calendar__option:disabled {
+  color: var(--text-faint);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.calendar__weekdays,
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.calendar__weekdays {
+  margin-bottom: 4px;
+}
+
+.calendar__weekdays span {
+  padding: 4px 0;
+  font-weight: 600;
+  font-size: 11px;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.calendar__grid {
+  gap: 2px;
+}
+
+.calendar__cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+}
+
+.calendar__day {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.calendar__day:hover:not(:disabled):not(.is-selected) {
+  background: var(--bg-subtle);
+}
+
+.calendar__day.is-today {
+  box-shadow: inset 0 0 0 2px var(--accent-default);
+  color: var(--accent-default);
+}
+
+.calendar__day.is-selected {
+  background: var(--accent-default);
+  color: var(--text-on-accent);
+}
+
+.calendar__day:disabled {
+  color: var(--text-faint);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.calendar__day:focus-visible,
+.calendar__nav:focus-visible,
+.calendar__title:focus-visible,
+.calendar__option:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 1px;
+}
+
+.calendar__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.calendar__clear,
+.calendar__today {
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.calendar__clear {
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.calendar__today {
+  font-weight: 700;
+  color: var(--accent-default);
+}
+
+.calendar__clear:hover,
+.calendar__today:hover {
+  background: var(--bg-subtle);
+}
+
 /* Qidiruvli ro'yxat (viloyat, tuman) */
 
-.search-select {
+.search-select__anchor {
   position: relative;
 }
 
@@ -905,6 +1177,20 @@
   background: var(--bg-surface);
   box-shadow: 0 12px 32px #0b192f24;
   animation: lang-menu-in 0.16s ease-out;
+}
+
+.search-select__menu--up {
+  top: auto;
+  bottom: calc(100% + 6px);
+  transform-origin: bottom left;
+  animation-name: search-select-up;
+}
+
+@keyframes search-select-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.96);
+  }
 }
 
 .search-select__menu--start {
@@ -951,7 +1237,8 @@
 }
 
 .search-select__list {
-  max-height: 300px;
+  max-height: var(--list-max, 300px);
+  scrollbar-width: thin;
   margin: 0;
   padding: 0;
   overflow-y: auto;
@@ -1365,6 +1652,13 @@
   }
   .search-select__menu {
     min-width: min(280px, calc(100vw - 40px));
+  }
+  .calendar {
+    width: min(300px, calc(100vw - 40px));
+  }
+  .calendar__day {
+    width: 34px;
+    height: 34px;
   }
 
   /* Profil: sarlavha tepada, tugma ekran pastida, footer ko'rinmaydi */
