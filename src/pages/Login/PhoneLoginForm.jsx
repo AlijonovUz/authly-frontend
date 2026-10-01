@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { registerPhone } from '../../api/auth.js'
 import { PhoneIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { AltLoginButtons, Field, FormAlert } from './FormParts.jsx'
+import { setPending } from './pendingVerification.js'
 
 const PHONE_PATTERN = /^\+998 \d{2} \d{3} \d{2} \d{2}$/
 
@@ -40,9 +42,17 @@ function PhoneLoginForm() {
     if (!canSubmit) return
     setSubmitError(null)
     setSubmitting(true)
+    const phone = form.phone.replace(/\s/g, '')
     try {
-      // TODO: backend API bilan ulash
-      await Promise.resolve(form)
+      const data = await registerPhone({
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        phone,
+      })
+      setPending({ kind: 'phone', identifier: phone })
+      // Raqam botga bog'lanmagan: bot kontaktni so'raydi va OTP'ni yuboradi
+      if (data?.bot_url) window.open(data.bot_url, '_blank', 'noopener')
+      window.location.hash = '#/'
     } catch (err) {
       setSubmitError({ message: err?.message ?? null })
     } finally {

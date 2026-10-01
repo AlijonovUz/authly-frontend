@@ -34,7 +34,7 @@
 .login__hero--services {
   justify-content: flex-start;
   gap: 32px;
-  padding: 68px 74px 0 48px;
+  padding: 40px 74px 0 48px;
   container-type: inline-size;
 }
 
@@ -147,11 +147,27 @@
   width: 100%;
   min-height: 0;
   margin: 0;
-  padding: 0 0 48px;
+  padding: 24px 0 48px;
   list-style: none;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
+  /* Yuqori va pastki chetda kartalar keskin kesilmasdan, asta-sekin yo'qoladi */
+  --fade: 64px;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade),
+    #000 calc(100% - var(--fade)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--fade),
+    #000 calc(100% - var(--fade)),
+    transparent 100%
+  );
 }
 
 .services::-webkit-scrollbar {
@@ -316,7 +332,7 @@
   gap: 24px;
   min-height: calc(100vh - 40px);
   margin: 20px 0 20px 20px;
-  padding: 48px 64px;
+  padding: 28px 64px 48px;
   border-radius: 24px;
   background: var(--bg-surface);
 }
@@ -475,6 +491,124 @@
 
 .form--profile .form__heading {
   margin-bottom: 8px;
+}
+
+/* Ro'yxatdan o'tish yakunlandi */
+
+.registered {
+  gap: 32px;
+  animation: registered-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes registered-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.registered__icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #e6f6ec;
+  color: var(--green-10);
+}
+
+.registered .form__title {
+  font-size: 40px;
+  line-height: 48px;
+}
+
+.registered__text {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 26px;
+}
+
+.registered__source {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--bg-subtle);
+}
+
+.registered__badge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent-default);
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--text-on-accent);
+}
+
+.registered__source-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.registered__label {
+  font-family: var(--font-manrope);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-faint);
+}
+
+.registered__name {
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 22px;
+  color: var(--text-strong);
+}
+
+.registered__link {
+  overflow: hidden;
+  font-family: var(--font-manrope);
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--accent-default);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.registered__link:hover {
+  text-decoration: underline;
+}
+
+.registered__back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.registered__hint {
+  margin-top: -16px;
+  font-family: var(--font-manrope);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+  color: var(--text-faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .registered {
+    animation: none;
+  }
 }
 
 /* Tasdiqlash kodi */
@@ -688,8 +822,21 @@
   cursor: not-allowed;
 }
 
-.field__select option {
-  color: var(--text-strong);
+.field__select {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  text-align: left;
+}
+
+.field__select-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.field__select:disabled .field__select-text {
+  opacity: 0.6;
 }
 
 .field__chevron {
@@ -697,6 +844,129 @@
   right: 16px;
   color: var(--text-strong);
   pointer-events: none;
+  transition: transform 0.15s ease;
+}
+
+.field__chevron.is-open {
+  transform: rotate(180deg);
+}
+
+.field__control--select.is-open {
+  border-color: var(--accent-default);
+  box-shadow: 0 0 0 3px #3f57b31f;
+}
+
+/* Qidiruvli ro'yxat (viloyat, tuman) */
+
+.search-select {
+  position: relative;
+}
+
+.search-select__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  min-width: 280px;
+  padding: 8px;
+  border: 1px solid #e4e7ee;
+  border-radius: 16px;
+  background: var(--bg-surface);
+  box-shadow: 0 12px 32px #0b192f24;
+  animation: lang-menu-in 0.16s ease-out;
+}
+
+.search-select__menu--start {
+  left: 0;
+  transform-origin: top left;
+}
+
+.search-select__menu--end {
+  right: 0;
+  transform-origin: top right;
+}
+
+.search-select__search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: var(--bg-muted);
+}
+
+.search-select__search-icon {
+  flex-shrink: 0;
+  color: #6b6f7b;
+}
+
+.search-select__input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--text-strong);
+}
+
+.search-select__input::placeholder {
+  color: #8b8f99;
+}
+
+.search-select__list {
+  max-height: 300px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.search-select__option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 38px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  font-family: var(--font-manrope);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  color: var(--text-strong);
+  cursor: pointer;
+}
+
+.search-select__option.is-active {
+  background: var(--bg-subtle);
+}
+
+.search-select__option.is-selected {
+  background: #e8eefa;
+  font-weight: 600;
+}
+
+.search-select__check {
+  flex-shrink: 0;
+  color: #2f6fd6;
+}
+
+.search-select__empty {
+  padding: 10px;
+  font-family: var(--font-manrope);
+  font-size: 14px;
+  color: var(--text-faint);
+  text-align: center;
 }
 
 .visually-hidden {
@@ -975,10 +1245,10 @@
     font-size: 36px;
   }
   .login__hero--services {
-    padding: 56px 48px 0 32px;
+    padding: 32px 48px 0 32px;
   }
   .login__panel {
-    padding: 40px 32px;
+    padding: 24px 32px 40px;
   }
 }
 
@@ -1062,6 +1332,12 @@
   .field__select {
     font-size: 16px;
   }
+  .search-select__input {
+    font-size: 16px;
+  }
+  .search-select__menu {
+    min-width: min(280px, calc(100vw - 40px));
+  }
 
   /* Profil: sarlavha tepada, tugma ekran pastida, footer ko'rinmaydi */
   .login__panel--profile {
@@ -1096,6 +1372,24 @@
   /* Tugma va oxirgi maydon orasida kamida 24px qoladi */
   .form--profile .profile__fields {
     margin-bottom: 8px;
+  }
+}
+
+@media (max-width: 600px) {
+  .registered {
+    gap: 24px;
+    margin-top: 32px;
+  }
+  .registered .form__title {
+    font-size: 30px;
+    line-height: 36px;
+  }
+  .registered__text {
+    font-size: 15px;
+    line-height: 24px;
+  }
+  .registered__hint {
+    margin-top: -12px;
   }
 }
 

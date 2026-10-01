@@ -122,6 +122,31 @@ export function ArrowUpRightIcon(props) {
   )
 }
 
+export function ArrowRightIcon(props) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} {...props}>
+      <path d="M5 12h14M13 6l6 6-6 6" />
+    </svg>
+  )
+}
+
+export function SearchIcon(props) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
+  )
+}
+
+export function CheckIcon(props) {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" {...stroke} strokeWidth={2.5} {...props}>
+      <path d="M5 12.5 10 17.5 19 7" />
+    </svg>
+  )
+}
+
 export function CalendarIcon(props) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" {...stroke} {...props}>

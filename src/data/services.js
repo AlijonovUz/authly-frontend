@@ -1,6 +1,6 @@
 // Chap paneldagi xizmatlar ro'yxati. title va text — har bir til uchun: { uz, ru, en }
 // url — protokolsiz manzil (kartada shunday ko'rinadi, havolaga https:// qo'shiladi)
-const DOMAIN = 'raqamlinazorat.uz'
+export const DOMAIN = 'raqamlinazorat.uz'
 const site = (sub) => `${sub}.${DOMAIN}`
 
 // Alohida manzili yo'q yo'nalishlar umumiy xizmatlar portaliga olib boradi

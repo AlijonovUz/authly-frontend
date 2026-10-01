@@ -1,17 +1,20 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { isLoggedIn } from '../../api/auth.js'
 import CodeLoginForm from './CodeLoginForm.jsx'
 import { Brand, FeaturesHero, ServicesHero } from './Hero.jsx'
 import LanguageSelect from './LanguageSelect.jsx'
 import PasswordLoginForm from './PasswordLoginForm.jsx'
 import PhoneLoginForm from './PhoneLoginForm.jsx'
 import ProfileForm from './ProfileForm.jsx'
+import { continueAfterLogin } from './session.js'
 import { useI18n } from '../../i18n/context.js'
 import './LoginPage.css'
 
-// Router ulanmaguncha hash orqali: "#/profile", "#/phone", "#/password"; qolgani — kod kiritish
+// Router ulanmaguncha hash orqali: "#/profile", "#/phone", "#/password"; qolgani — kod kiritish.
+// Hash ichidagi so'rov qismi ("#/?code=123456") yo'nalishga ta'sir qilmaydi.
 const ROUTES = ['code', 'profile', 'phone', 'password']
 const getRoute = () => {
-  const route = window.location.hash.replace(/^#\//, '')
+  const route = window.location.hash.replace(/^#\/?/, '').split('?')[0]
   return ROUTES.includes(route) ? route : 'code'
 }
 
@@ -25,15 +28,17 @@ function LoginPage() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  const goToProfile = useCallback(() => {
-    window.location.hash = '#/profile'
-  }, [])
+  // Profil sahifasi faqat kirgan foydalanuvchi uchun
+  const blocked = route === 'profile' && !isLoggedIn()
+  useEffect(() => {
+    if (blocked) window.location.hash = '#/'
+  }, [blocked])
 
   const forms = {
-    code: <CodeLoginForm onVerified={goToProfile} />,
-    profile: <ProfileForm />,
+    code: <CodeLoginForm onVerified={continueAfterLogin} />,
+    profile: blocked ? null : <ProfileForm />,
     phone: <PhoneLoginForm />,
-    password: <PasswordLoginForm />,
+    password: <PasswordLoginForm onLoggedIn={continueAfterLogin} />,
   }
 
   return (
