@@ -158,11 +158,11 @@ export async function request(path, { method = 'GET', body, query, auth = true }
 }
 
 // Sahifalangan ro'yxatning barcha sahifalarini yig'ib beradi ({ count, next, results })
-export async function requestAll(path, query) {
+export async function requestAll(path, query, { auth = true } = {}) {
   const all = []
   let page = 1
   for (;;) {
-    const data = await request(path, { query: { ...query, page } })
+    const data = await request(path, { query: { ...query, page }, auth })
     if (Array.isArray(data)) return data
     all.push(...(data?.results ?? []))
     if (!data?.next) return all
