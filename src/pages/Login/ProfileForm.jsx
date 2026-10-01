@@ -1,9 +1,12 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { saveProfile } from '../../api/auth.js'
-import { CalendarIcon, ChevronDownIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
-import { REGIONS } from '../../data/regions.js'
+import { getMe, saveProfile } from '../../api/auth.js'
+import { mediaUrl } from '../../api/client.js'
+import { getDistricts, getRegions } from '../../api/references.js'
+import { CalendarIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
-import { Field } from './FormParts.jsx'
+import { Field, FormAlert } from './FormParts.jsx'
+import RegisteredView from './RegisteredView.jsx'
+import SearchSelect from './SearchSelect.jsx'
 
 const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
 const ThinUserIcon = thinIcon(UserIcon)
@@ -23,6 +26,12 @@ const useIsPhone = () =>
 function formatDate(value) {
   const digits = value.replace(/\D/g, '').slice(0, 8)
   return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4, 8)].filter(Boolean).join('.')
+}
+
+// Backend sanasi "YYYY-MM-DD" → "KK.OO.YYYY"
+function fromApiDate(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(value ?? '')
+  return match ? `${match[3]}.${match[2]}.${match[1]}` : ''
 }
 
 function isValidBirthDate(value) {
@@ -49,36 +58,6 @@ function validate(form, t) {
     errors.birthDate = form.birthDate ? t('profile.birthDateInvalid') : true
   }
   return errors
-}
-
-function SelectField({ id, label, placeholder, options, value, onChange, error, disabled }) {
-  return (
-    <div className="field">
-      <label className="field__label" htmlFor={id}>
-        {label}
-      </label>
-      <div className={error ? 'field__control field__control--select has-error' : 'field__control field__control--select'}>
-        <select
-          id={id}
-          className={value ? 'field__select' : 'field__select is-placeholder'}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          aria-invalid={Boolean(error)}
-        >
-          <option value="" disabled>
-            {placeholder}
-          </option>
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <ChevronDownIcon className="field__chevron" />
-      </div>
-    </div>
-  )
 }
 
 function AvatarPicker({ photoUrl, onChange }) {
@@ -124,20 +103,65 @@ function ProfileForm() {
   const [submitted, setSubmitted] = useState(false)
   const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
+  const [registered, setRegistered] = useState(false)
+  const [saveError, setSaveError] = useState(null) // { message } | null
+  const [regions, setRegions] = useState([])
+  const [loadedDistricts, setLoadedDistricts] = useState({ region: '', list: [] })
+  // Boshqa viloyat tanlangan bo'lsa eski ro'yxat ko'rinmaydi
+  const districts = loadedDistricts.region === form.region ? loadedDistricts.list : []
   const { t } = useI18n()
 
   // Oldingi surat uchun yaratilgan vaqtinchalik manzilni bo'shatamiz
   useEffect(() => {
-    if (!photo) return
+    if (!photo || photo.remote) return
     return () => URL.revokeObjectURL(photo.url)
   }, [photo])
+
+  // Viloyatlar ro'yxati va avval saqlangan profil ma'lumotlari
+  useEffect(() => {
+    let active = true
+    getRegions()
+      .then((list) => active && setRegions(list))
+      .catch(() => {})
+    getMe()
+      .then((me) => {
+        if (!active || !me) return
+        setForm((f) => ({
+          firstName: f.firstName || me.first_name || '',
+          lastName: f.lastName || me.last_name || '',
+          region: f.region || me.region_info?.id || '',
+          district: f.district || me.district_info?.id || '',
+          birthDate: f.birthDate || fromApiDate(me.birth_date),
+        }))
+        if (me.avatar) setPhoto((p) => p ?? { file: null, url: mediaUrl(me.avatar), remote: true })
+      })
+      .catch((err) => {
+        // Sessiya tugagan — qaytadan kirish kerak
+        if (err?.status === 401) window.location.hash = '#/'
+      })
+    return () => {
+      active = false
+    }
+  }, [])
+
+  // Tanlangan viloyat tumanlari
+  useEffect(() => {
+    if (!form.region) return
+    let active = true
+    const region = form.region
+    getDistricts(region)
+      .then((list) => active && setLoadedDistricts({ region, list }))
+      .catch(() => {})
+    return () => {
+      active = false
+    }
+  }, [form.region])
 
   const pickPhoto = (file) => {
     if (file) setPhoto({ file, url: URL.createObjectURL(file) })
   }
 
   const errors = submitted ? validate(form, t) : {}
-  const districts = REGIONS.find((r) => r.name === form.region)?.districts ?? []
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
@@ -146,13 +170,22 @@ function ProfileForm() {
     setSubmitted(true)
     if (Object.keys(validate(form, t)).length > 0 || submitting) return
     setSubmitting(true)
+    setSaveError(null)
     try {
-      // TODO: backend tayyor bo'lgach, keyingi sahifaga yo'naltirish
       await saveProfile({ ...form, photo: photo?.file ?? null })
+      setRegistered(true)
+    } catch (err) {
+      if (err?.status === 401) {
+        window.location.hash = '#/'
+        return
+      }
+      setSaveError({ message: err?.status && err.status < 500 ? err.message : null })
     } finally {
       setSubmitting(false)
     }
   }
+
+  if (registered) return <RegisteredView />
 
   return (
     <form className="form form--profile" onSubmit={handleSubmit} noValidate>
@@ -160,6 +193,10 @@ function ProfileForm() {
         <h2 className="form__title">{t('profile.title')}</h2>
         <p className="form__subtitle">{t('profile.subtitle')}</p>
       </div>
+
+      {saveError && (
+        <FormAlert title={t('phone.errorTitle')} message={saveError.message ?? t('common.errorText')} />
+      )}
 
       <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
 
@@ -188,22 +225,27 @@ function ProfileForm() {
         </div>
 
         <div className="profile__row">
-          <SelectField
+          <SearchSelect
             id="region"
             label={t('field.region')}
             placeholder={t(isPhone ? 'common.select' : 'field.regionPlaceholder')}
-            options={REGIONS.map((r) => r.name)}
+            searchPlaceholder={t('field.regionSearch')}
+            options={regions}
             value={form.region}
-            onChange={(e) => setForm((f) => ({ ...f, region: e.target.value, district: '' }))}
+            onChange={(region) =>
+              setForm((f) => (f.region === region ? f : { ...f, region, district: '' }))
+            }
             error={errors.region}
           />
-          <SelectField
+          <SearchSelect
             id="district"
             label={t('field.district')}
             placeholder={t(isPhone ? 'common.select' : 'field.districtPlaceholder')}
+            searchPlaceholder={t('field.districtSearch')}
             options={districts}
             value={form.district}
-            onChange={update('district')}
+            onChange={(district) => setForm((f) => ({ ...f, district }))}
+            align="end"
             error={errors.district}
             disabled={!form.region}
           />

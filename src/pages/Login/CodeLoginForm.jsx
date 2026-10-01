@@ -1,26 +1,76 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { verifyCode } from '../../api/auth.js'
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
+import {
+  googleLogin,
+  login,
+  telegramLogin,
+  verifyIdentifier,
+  verifyRegisterPhone,
+} from '../../api/auth.js'
 import { GoogleIcon } from '../../components/icons.jsx'
 import Toast from '../../components/Toast.jsx'
 import { useI18n } from '../../i18n/context.js'
+import { signInWithGoogle } from '../../utils/googleAuth.js'
+import { clearPending, getPending } from './pendingVerification.js'
 
 const LENGTH = 6
 const SUCCESS_DELAY = 700
 
+// Kod yuboradigan Telegram bot (.env: VITE_TELEGRAM_BOT, @ belgisisiz)
+const BOT = import.meta.env.VITE_TELEGRAM_BOT || 'raqamli_passport_bot'
+
+// Bot yuborgan havola orqali kelgan kod: https://passport.raqamlinazorat.uz/#/?code=123456
+// (oddiy "?code=123456" ham qabul qilinadi)
+const hashParams = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '')
+
+function readLinkCode() {
+  const code = hashParams().get('code') ?? new URLSearchParams(window.location.search).get('code')
+  return code?.length === LENGTH && /^\d+$/.test(code) ? code : null
+}
+
+// Kod ishlatilgach manzildan olib tashlanadi — sahifa yangilansa qayta yuborilmasin
+function clearLinkCode() {
+  const url = new URL(window.location.href)
+  url.searchParams.delete('code')
+  const [path, query = ''] = url.hash.split('?')
+  const params = new URLSearchParams(query)
+  params.delete('code')
+  url.hash = params.size ? `${path}?${params}` : path
+  history.replaceState(history.state, '', url)
+}
+
+// Kodni tekshiradi. true — foydalanuvchi kirdi (token bor), false — kod to'g'ri, lekin
+// backend token bermadi (endi Telegram bot kodi bilan kirish kerak).
+async function submitCode(code) {
+  const pending = getPending()
+  if (!pending) {
+    await telegramLogin(code)
+    return true
+  }
+  if (pending.kind === 'login') {
+    await verifyIdentifier(pending.identifier, code)
+    await login(pending.identifier, pending.password)
+    clearPending()
+    return true
+  }
+  // kind === 'phone'
+  const loggedIn = await verifyRegisterPhone(pending.identifier, code)
+  clearPending()
+  return loggedIn
+}
+
 // status: idle | checking | success | error
 function CodeLoginForm({ onVerified }) {
-  const [digits, setDigits] = useState(() => Array(LENGTH).fill(''))
-  const [status, setStatus] = useState('idle')
+  const [digits, setDigits] = useState(() => readLinkCode()?.split('') ?? Array(LENGTH).fill(''))
+  const [status, setStatus] = useState(() => (readLinkCode() ? 'checking' : 'idle'))
   const [toastOpen, setToastOpen] = useState(false)
+  const [toastText, setToastText] = useState(null)
+  const [toastTitle, setToastTitle] = useState(null)
+  const [googleBusy, setGoogleBusy] = useState(false)
   const inputs = useRef([])
   const { t } = useI18n()
 
   const locked = status === 'checking' || status === 'success'
   const closeToast = useCallback(() => setToastOpen(false), [])
-
-  useEffect(() => {
-    inputs.current[0]?.focus()
-  }, [])
 
   // Muvaffaqiyatli holat (yashil) biroz ko'rinib turadi, so'ng keyingi qadamga o'tiladi
   useEffect(() => {
@@ -38,13 +88,67 @@ function CodeLoginForm({ onVerified }) {
   const verify = async (code) => {
     setStatus('checking')
     try {
-      await verifyCode(code)
+      const loggedIn = await submitCode(code)
       setToastOpen(false)
-      setStatus('success')
-    } catch {
+      if (loggedIn) {
+        setStatus('success')
+      } else {
+        // Ro'yxatdan o'tish tasdiqlandi — endi botdan olingan kod bilan kiriladi
+        setDigits(Array(LENGTH).fill(''))
+        setStatus('idle')
+        focusAt(0)
+      }
+    } catch (err) {
+      // Tarmoq yoki server xatosi — "kod noto'g'ri" emas
+      setToastTitle(null)
+      setToastText(err?.status && err.status < 500 ? null : t('common.errorText'))
       setStatus('error')
       setToastOpen(true)
       focusAt(0)
+    }
+  }
+
+  // Havola orqali kod kelgan bo'lsa — darhol tekshiramiz, aks holda birinchi katakka fokus
+  const onMount = useEffectEvent(() => {
+    const code = readLinkCode()
+    if (!code) {
+      inputs.current[0]?.focus()
+      return
+    }
+    clearLinkCode()
+    // Holat allaqachon 'checking' (boshlang'ich qiymat) — so'rov effektdan keyin yuboriladi
+    queueMicrotask(() => verify(code))
+  })
+  useEffect(() => {
+    onMount()
+  }, [])
+
+  // Google oynasida akkaunt tanlanadi, olingan id_token backend'ga yuboriladi
+  const handleGoogle = async () => {
+    setToastOpen(false)
+    let idToken
+    try {
+      idToken = await signInWithGoogle()
+    } catch (err) {
+      // Foydalanuvchi o'zi bekor qilgan bo'lsa xabar chiqmaydi
+      if (!err?.cancelled) {
+        setToastTitle(t('google.errorTitle'))
+        setToastText(t('common.errorText'))
+        setToastOpen(true)
+      }
+      return
+    }
+    setGoogleBusy(true)
+    try {
+      await googleLogin(idToken)
+      clearPending()
+      await onVerified()
+    } catch (err) {
+      setToastTitle(t('google.errorTitle'))
+      setToastText(err?.status && err.status < 500 && err.message ? err.message : t('common.errorText'))
+      setToastOpen(true)
+    } finally {
+      setGoogleBusy(false)
     }
   }
 
@@ -101,8 +205,8 @@ function CodeLoginForm({ onVerified }) {
         {/* Havola o'rni tilga qarab o'zgaradi: matn ikki bo'lakka ajratilgan */}
         <p className="form__subtitle">
           {t('code.subtitleBefore')}{' '}
-          <a href="https://t.me/raqamlibot" target="_blank" rel="noreferrer">
-            @raqamlibot
+          <a href={`https://t.me/${BOT}`} target="_blank" rel="noreferrer">
+            @{BOT}
           </a>{' '}
           {t('code.subtitleAfter')}
         </p>
@@ -135,15 +239,24 @@ function CodeLoginForm({ onVerified }) {
           <span>{t('common.or')}</span>
         </div>
 
-        {/* TODO: Google OAuth manzilini ulash */}
-        <button type="button" className="btn-google">
+        <button
+          type="button"
+          className="btn-google"
+          onClick={handleGoogle}
+          disabled={googleBusy || locked}
+          aria-busy={googleBusy}
+        >
           <GoogleIcon />
           {t('code.google')}
         </button>
       </div>
 
       {toastOpen && (
-        <Toast title={t('code.invalidTitle')} message={t('code.invalidText')} onClose={closeToast} />
+        <Toast
+          title={toastTitle ?? t('code.invalidTitle')}
+          message={toastText ?? t('code.invalidText')}
+          onClose={closeToast}
+        />
       )}
     </div>
   )

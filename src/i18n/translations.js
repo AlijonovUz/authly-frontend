@@ -15,6 +15,7 @@ export const TRANSLATIONS = {
 
     'common.or': 'yoki',
     'common.select': 'Tanlang',
+    'common.notFound': 'Hech narsa topilmadi',
     'common.close': 'Yopish',
     'common.errorText': 'Nimadir xato ketdi. Qaytadan urinib koʻring.',
 
@@ -26,6 +27,7 @@ export const TRANSLATIONS = {
     'code.google': 'Google orqali davom etish',
     'code.invalidTitle': 'Yaroqsiz kod',
     'code.invalidText': 'Iltimos qayta urinib koʻring',
+    'google.errorTitle': 'Google orqali kirib boʻlmadi',
 
     'login.title': 'Tizimga kirish',
     'login.submit': 'Kirish',
@@ -47,6 +49,8 @@ export const TRANSLATIONS = {
     'field.regionPlaceholder': 'Viloyatni tanlang',
     'field.district': 'Tuman',
     'field.districtPlaceholder': 'Tumanni tanlang',
+    'field.regionSearch': 'Viloyat qidirish',
+    'field.districtSearch': 'Tuman qidirish',
     'field.birthDate': 'Tugʻilgan sana',
     'field.birthDatePlaceholder': 'KK.OO.YYYY',
 
@@ -67,6 +71,12 @@ export const TRANSLATIONS = {
     'profile.uploadPhoto': 'Profil suratini yuklash',
     'profile.birthDateInvalid': 'Sana notoʻgʻri kiritilgan',
     'profile.submit': 'Davom etish',
+    'registered.title': 'Roʻyxatdan oʻtdingiz!',
+    'registered.text':
+      'Passport profilingiz tayyor. Endi Raqamli Nazorat loyihalarining barchasiga shu bitta profil orqali kirasiz — qayta roʻyxatdan oʻtish shart emas.',
+    'registered.source': 'Siz kelgan sayt',
+    'registered.back': '{name}ga qaytish',
+    'registered.redirect': '{n} soniyadan soʻng avtomatik qaytasiz',
   },
 
   ru: {
@@ -84,6 +94,7 @@ export const TRANSLATIONS = {
 
     'common.or': 'или',
     'common.select': 'Выберите',
+    'common.notFound': 'Ничего не найдено',
     'common.close': 'Закрыть',
     'common.errorText': 'Что-то пошло не так. Попробуйте ещё раз.',
 
@@ -95,6 +106,7 @@ export const TRANSLATIONS = {
     'code.google': 'Продолжить через Google',
     'code.invalidTitle': 'Неверный код',
     'code.invalidText': 'Пожалуйста, попробуйте ещё раз',
+    'google.errorTitle': 'Не удалось войти через Google',
 
     'login.title': 'Вход в систему',
     'login.submit': 'Войти',
@@ -116,6 +128,8 @@ export const TRANSLATIONS = {
     'field.regionPlaceholder': 'Выберите область',
     'field.district': 'Район',
     'field.districtPlaceholder': 'Выберите район',
+    'field.regionSearch': 'Поиск области',
+    'field.districtSearch': 'Поиск района',
     'field.birthDate': 'Дата рождения',
     'field.birthDatePlaceholder': 'ДД.ММ.ГГГГ',
 
@@ -136,6 +150,12 @@ export const TRANSLATIONS = {
     'profile.uploadPhoto': 'Загрузить фото профиля',
     'profile.birthDateInvalid': 'Дата введена неверно',
     'profile.submit': 'Продолжить',
+    'registered.title': 'Вы зарегистрированы!',
+    'registered.text':
+      'Ваш профиль Passport готов. Теперь вы входите во все проекты Raqamli Nazorat с этим единым профилем — повторная регистрация не нужна.',
+    'registered.source': 'Сайт, с которого вы пришли',
+    'registered.back': 'Вернуться в «{name}»',
+    'registered.redirect': 'Автоматический возврат через {n} сек.',
   },
 
   en: {
@@ -152,6 +172,7 @@ export const TRANSLATIONS = {
 
     'common.or': 'or',
     'common.select': 'Select',
+    'common.notFound': 'Nothing found',
     'common.close': 'Close',
     'common.errorText': 'Something went wrong. Please try again.',
 
@@ -163,6 +184,7 @@ export const TRANSLATIONS = {
     'code.google': 'Continue with Google',
     'code.invalidTitle': 'Invalid code',
     'code.invalidText': 'Please try again',
+    'google.errorTitle': 'Could not sign in with Google',
 
     'login.title': 'Sign in',
     'login.submit': 'Sign in',
@@ -184,6 +206,8 @@ export const TRANSLATIONS = {
     'field.regionPlaceholder': 'Select a region',
     'field.district': 'District',
     'field.districtPlaceholder': 'Select a district',
+    'field.regionSearch': 'Search region',
+    'field.districtSearch': 'Search district',
     'field.birthDate': 'Date of birth',
     'field.birthDatePlaceholder': 'DD.MM.YYYY',
 
@@ -204,5 +228,11 @@ export const TRANSLATIONS = {
     'profile.uploadPhoto': 'Upload a profile photo',
     'profile.birthDateInvalid': 'The date is invalid',
     'profile.submit': 'Continue',
+    'registered.title': 'You are registered!',
+    'registered.text':
+      'Your Passport profile is ready. You can now sign in to every Raqamli Nazorat project with this single profile — no need to register again.',
+    'registered.source': 'The site you came from',
+    'registered.back': 'Back to {name}',
+    'registered.redirect': 'You will be redirected automatically in {n} seconds',
   },
 }

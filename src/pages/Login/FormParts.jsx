@@ -60,12 +60,24 @@ export function AltLoginButtons() {
   const { t } = useI18n()
   return (
     <div className="form__alt">
-      <button type="button" className="btn-pill btn-telegram">
+      <button
+        type="button"
+        className="btn-pill btn-telegram"
+        onClick={() => {
+          window.location.hash = '#/'
+        }}
+      >
         <SendIcon />
         <span className="label-full">{t('login.telegramFull')}</span>
         <span className="label-short">{t('login.telegramShort')}</span>
       </button>
-      <button type="button" className="btn-pill btn-outline">
+      <button
+        type="button"
+        className="btn-pill btn-outline"
+        onClick={() => {
+          window.location.hash = '#/password'
+        }}
+      >
         <MailIcon />
         <span className="label-full">{t('login.emailFull')}</span>
         <span className="label-short">{t('login.emailShort')}</span>

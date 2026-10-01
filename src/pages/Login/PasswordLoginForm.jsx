@@ -1,9 +1,17 @@
 import { useState } from 'react'
+import { login } from '../../api/auth.js'
 import { EyeIcon, EyeOffIcon, LockIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { AltLoginButtons, Field, FormAlert } from './FormParts.jsx'
+import { setPending } from './pendingVerification.js'
 
-function PasswordLoginForm() {
+// Telefon raqami kiritilgan bo'lsa bo'sh joy va qavslarni olib tashlaymiz: "+998 90 123-45-67" → "+998901234567"
+const normalizeLogin = (value) => {
+  const trimmed = value.trim()
+  return /^\+?[\d\s()-]+$/.test(trimmed) ? trimmed.replace(/[^\d+]/g, '') : trimmed
+}
+
+function PasswordLoginForm({ onLoggedIn }) {
   const [form, setForm] = useState({ login: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [capsLock, setCapsLock] = useState(false)
@@ -26,13 +34,19 @@ function PasswordLoginForm() {
     if (!canSubmit) return
     setSubmitError(null)
     setSubmitting(true)
+    const identifier = normalizeLogin(form.login)
     try {
-      // TODO: backend API bilan ulash. Xato bo'lsa, masalan:
-      // throw { attemptsLeft: 4 }
-      await Promise.resolve(form)
+      await login(identifier, form.password)
+      await onLoggedIn()
     } catch (err) {
+      // Raqam/email tasdiqlanmagan: backend OTP yubordi — kod kiritish sahifasiga o'tamiz
+      if (err?.verificationRequired) {
+        setPending({ kind: 'login', identifier, password: form.password })
+        window.location.hash = '#/'
+        return
+      }
       setPasswordInvalid(true)
-      setSubmitError({ attemptsLeft: err?.attemptsLeft ?? null })
+      setSubmitError({ attemptsLeft: err?.data?.attempts_left ?? null })
     } finally {
       setSubmitting(false)
     }
