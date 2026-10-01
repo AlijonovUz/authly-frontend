@@ -1,5 +1,5 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import { CheckIcon, ChevronDownIcon, SearchIcon } from '../../components/icons.jsx'
+import { ChevronDownIcon, SearchIcon, XIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 
 // Qidiruvda apostrof turlari (ʻ ' ‘ ’ `) va katta-kichik harf farqi hisobga olinmaydi:
@@ -116,11 +116,14 @@ function SearchSelect({
     }
   }
 
+  const clearable = Boolean(selected) && !disabled
+
   const controlClass = [
     'field__control',
     'field__control--select',
     error && 'has-error',
     open && 'is-open',
+    clearable && 'is-clearable',
   ]
     .filter(Boolean)
     .join(' ')
@@ -146,7 +149,26 @@ function SearchSelect({
           >
             <span className="field__select-text">{selected?.name ?? placeholder}</span>
           </button>
-          <ChevronDownIcon className={open ? 'field__chevron is-open' : 'field__chevron'} />
+          {/* Tanlovni tozalash (dc-management'dagi kabi ×) */}
+          {clearable && (
+            <button
+              type="button"
+              className="field__clear"
+              aria-label={t('common.clear')}
+              onClick={() => {
+                onChange('')
+                setOpen(false)
+                triggerRef.current?.focus()
+              }}
+            >
+              <XIcon width="14" height="14" />
+            </button>
+          )}
+          <ChevronDownIcon
+            width="16"
+            height="16"
+            className={open ? 'field__chevron is-open' : 'field__chevron'}
+          />
         </div>
 
         {open && (
@@ -202,8 +224,7 @@ function SearchSelect({
                     onPointerMove={() => setActive(i)}
                     onClick={() => choose(option)}
                   >
-                    <span>{option.name}</span>
-                    {isSelected && <CheckIcon className="search-select__check" width="18" height="18" />}
+                    <span className="search-select__option-text">{option.name}</span>
                   </li>
                 )
               })}

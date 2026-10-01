@@ -155,14 +155,22 @@ function ProfileForm() {
     if (file) setPhoto({ file, url: URL.createObjectURL(file) })
   }
 
-  const errors = submitted ? validate(form, t) : {}
+  // Hamma maydon to'g'ri to'ldirilmaguncha "Davom etish" nofaol
+  const allErrors = validate(form, t)
+  const isComplete = Object.keys(allErrors).length === 0
+  // Tugma nofaol bo'lgani uchun forma yuborilmaydi — sana to'liq yozilib, xato bo'lsa darhol ko'rsatamiz
+  const errors = submitted
+    ? allErrors
+    : form.birthDate.length === 10 && allErrors.birthDate
+      ? { birthDate: allErrors.birthDate }
+      : {}
 
   const update = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setSubmitted(true)
-    if (Object.keys(validate(form, t)).length > 0 || submitting) return
+    if (!isComplete || submitting) return
     setSubmitting(true)
     setSaveError(null)
     try {
@@ -255,7 +263,11 @@ function ProfileForm() {
         />
       </div>
 
-      <button type="submit" className="btn-primary btn-primary--lg" disabled={submitting}>
+      <button
+        type="submit"
+        className="btn-primary btn-primary--lg"
+        disabled={!isComplete || submitting}
+      >
         {t('profile.submit')}
       </button>
     </form>
