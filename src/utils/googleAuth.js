@@ -1,113 +1,78 @@
-// Google orqali kirish: o'zimizning tugma bosilganda Google oynasi (popup) ochiladi va
-// OpenID Connect orqali id_token olinadi. Google shu saytning bosh sahifasiga qaytaradi
-// ("#id_token=..."), popup natijani BroadcastChannel orqali asosiy oynaga yuboradi va yopiladi.
+// Google orqali kirish — Google Identity Services (GIS). Natijada id_token (credential) olinadi
+// va backend'ga (/auth/google/login/) yuboriladi.
 //
-// Google Cloud Console → OAuth client → "Authorized redirect URIs" ga quyidagilar qo'shilishi kerak:
-//   http://localhost:5173/   va   https://<frontend domeni>/
+// Dizayndagi o'zimizning tugma ko'rinib turadi, uning ustiga Google'ning haqiqiy tugmasi
+// shaffof qilib joylanadi (GIS oynani faqat o'z tugmasidan ochishga ruxsat beradi).
+//
+// Google Cloud Console → OAuth client → "Authorized JavaScript origins" ga qo'shilishi kerak:
+//   https://passport.raqamlinazorat.uz   va   http://localhost:5173
 
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
-const CHANNEL = 'passport-google-auth'
+const CLIENT_ID =
+  import.meta.env.VITE_GOOGLE_CLIENT_ID ||
+  '39718534758-otk8par32b12bg9t168k1ea9u57aleu4.apps.googleusercontent.com'
 
-const redirectUri = () => new URL(import.meta.env.BASE_URL, window.location.origin).href
+const SCRIPT_SRC = 'https://accounts.google.com/gsi/client'
 
-const randomString = () => {
-  const bytes = crypto.getRandomValues(new Uint8Array(16))
-  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('')
-}
+// Google tugmasining eng katta kengligi va "large" o'lchamdagi balandligi
+export const GOOGLE_BUTTON_WIDTH = 400
+export const GOOGLE_BUTTON_HEIGHT = 40
 
-// JWT ichidagi ma'lumot (imzo backend'da tekshiriladi, bu yerda faqat nonce solishtiriladi)
-function jwtPayload(token) {
-  try {
-    const part = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
-    const bytes = Uint8Array.from(atob(part), (c) => c.charCodeAt(0))
-    return JSON.parse(new TextDecoder().decode(bytes))
-  } catch {
-    return null
-  }
-}
+let loading = null
+let listener = null
 
-// Popup ichida chaqiriladi (main.jsx, ilova chizilishidan oldin).
-// true — bu Google'dan qaytgan popup: natija yuborildi, ilovani chizish shart emas.
-export function handleGoogleCallback() {
-  const hash = window.location.hash.slice(1)
-  if (!/(^|&)(id_token|error)=/.test(hash) || !/(^|&)state=/.test(hash)) return false
-
-  const params = new URLSearchParams(hash)
-  const message = {
-    idToken: params.get('id_token'),
-    error: params.get('error'),
-    state: params.get('state'),
-  }
-  // Token manzil satrida qolmasin
-  history.replaceState(null, '', window.location.pathname + window.location.search)
-
-  const channel = new BroadcastChannel(CHANNEL)
-  channel.postMessage(message)
-  channel.close()
-  window.close()
-  return true
-}
-
-let pending = null
-
-// Google oynasini ochadi va id_token bilan yakunlanadi. Foydalanuvchi oynani yopsa —
-// va'da osilib qoladi, lekin tugmani qayta bosish yangi urinishni boshlaydi.
-export function signInWithGoogle() {
-  if (!CLIENT_ID) return Promise.reject(new Error('VITE_GOOGLE_CLIENT_ID berilmagan'))
-
-  pending?.cancel()
-
-  const state = randomString()
-  const nonce = randomString()
-
-  const url = new URL('https://accounts.google.com/o/oauth2/v2/auth')
-  url.search = new URLSearchParams({
-    client_id: CLIENT_ID,
-    redirect_uri: redirectUri(),
-    response_type: 'id_token',
-    scope: 'openid email profile',
-    prompt: 'select_account',
-    state,
-    nonce,
+function loadGis() {
+  loading ??= new Promise((resolve, reject) => {
+    if (window.google?.accounts?.id) {
+      resolve(window.google.accounts.id)
+      return
+    }
+    const script = document.createElement('script')
+    script.src = SCRIPT_SRC
+    script.async = true
+    script.onload = () =>
+      window.google?.accounts?.id ? resolve(window.google.accounts.id) : reject(new Error('GIS yo‘q'))
+    script.onerror = () => reject(new Error('Google skripti yuklanmadi'))
+    document.head.appendChild(script)
   })
+    .then((gis) => {
+      gis.initialize({
+        client_id: CLIENT_ID,
+        callback: ({ credential }) => listener?.(credential),
+        // Google'ning to'liq "Choose an account" oynasi (popup). FedCM yoqilsa Chrome uning
+        // o'rniga o'zining kichik dialogini ko'rsatadi
+        ux_mode: 'popup',
+        auto_select: false,
+        use_fedcm_for_button: false,
+      })
+      return gis
+    })
+    .catch((err) => {
+      // Keyingi urinishda qaytadan yuklanadi
+      loading = null
+      throw err
+    })
+  return loading
+}
 
-  const width = 500
-  const height = 640
-  const left = window.screenX + (window.outerWidth - width) / 2
-  const top = window.screenY + (window.outerHeight - height) / 2
-  const popup = window.open(
-    url.href,
-    'passport-google',
-    `width=${width},height=${height},left=${left},top=${top}`,
-  )
-  if (!popup) return Promise.reject(new Error('Popup bloklandi'))
-
-  return new Promise((resolve, reject) => {
-    const channel = new BroadcastChannel(CHANNEL)
-    const finish = () => {
-      channel.close()
-      pending = null
-    }
-    pending = {
-      cancel: () => {
-        finish()
-        reject(Object.assign(new Error('Bekor qilindi'), { cancelled: true }))
-      },
-    }
-    channel.onmessage = ({ data }) => {
-      if (data?.state !== state) return
-      finish()
-      if (data.error || !data.idToken) {
-        const err = new Error(data.error || 'Google javob bermadi')
-        err.cancelled = data.error === 'access_denied'
-        reject(err)
-        return
-      }
-      if (jwtPayload(data.idToken)?.nonce !== nonce) {
-        reject(new Error('Google javobi tekshiruvdan o‘tmadi'))
-        return
-      }
-      resolve(data.idToken)
-    }
+// container ichiga Google tugmasini chizadi. onCredential(idToken) — akkaunt tanlangach chaqiriladi.
+// Qaytaradi: tozalash funksiyasi.
+export async function renderGoogleButton(container, { locale, onCredential }) {
+  const gis = await loadGis()
+  listener = onCredential
+  container.replaceChildren()
+  gis.renderButton(container, {
+    type: 'standard',
+    theme: 'outline',
+    size: 'large',
+    shape: 'rectangular',
+    text: 'continue_with',
+    width: GOOGLE_BUTTON_WIDTH,
+    locale,
   })
+  // Keyinroq chizilgan tugmaga tegmaymiz (StrictMode'da effekt ikki marta ishlaydi)
+  const rendered = container.firstElementChild
+  return () => {
+    if (listener === onCredential) listener = null
+    if (container.firstElementChild === rendered) container.replaceChildren()
+  }
 }
