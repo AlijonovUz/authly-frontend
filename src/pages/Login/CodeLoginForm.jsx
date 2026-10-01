@@ -9,7 +9,11 @@ import {
 import { GoogleIcon } from '../../components/icons.jsx'
 import Toast from '../../components/Toast.jsx'
 import { useI18n } from '../../i18n/context.js'
-import { signInWithGoogle } from '../../utils/googleAuth.js'
+import {
+  GOOGLE_BUTTON_HEIGHT,
+  GOOGLE_BUTTON_WIDTH,
+  renderGoogleButton,
+} from '../../utils/googleAuth.js'
 import { clearPending, getPending } from './pendingVerification.js'
 
 const LENGTH = 6
@@ -66,8 +70,11 @@ function CodeLoginForm({ onVerified }) {
   const [toastText, setToastText] = useState(null)
   const [toastTitle, setToastTitle] = useState(null)
   const [googleBusy, setGoogleBusy] = useState(false)
+  const [googleReady, setGoogleReady] = useState(false)
   const inputs = useRef([])
-  const { t } = useI18n()
+  const googleRef = useRef(null)
+  const googleSlot = useRef(null)
+  const { t, lang } = useI18n()
 
   const locked = status === 'checking' || status === 'success'
   const closeToast = useCallback(() => setToastOpen(false), [])
@@ -123,34 +130,60 @@ function CodeLoginForm({ onVerified }) {
     onMount()
   }, [])
 
-  // Google oynasida akkaunt tanlanadi, olingan id_token backend'ga yuboriladi
-  const handleGoogle = async () => {
+  const showGoogleError = (text) => {
+    setToastTitle(t('google.errorTitle'))
+    setToastText(text ?? t('common.errorText'))
+    setToastOpen(true)
+  }
+
+  // Google oynasida akkaunt tanlangach olingan id_token backend'ga yuboriladi
+  const onGoogleCredential = useEffectEvent(async (idToken) => {
     setToastOpen(false)
-    let idToken
-    try {
-      idToken = await signInWithGoogle()
-    } catch (err) {
-      // Foydalanuvchi o'zi bekor qilgan bo'lsa xabar chiqmaydi
-      if (!err?.cancelled) {
-        setToastTitle(t('google.errorTitle'))
-        setToastText(t('common.errorText'))
-        setToastOpen(true)
-      }
-      return
-    }
     setGoogleBusy(true)
     try {
       await googleLogin(idToken)
       clearPending()
       await onVerified()
     } catch (err) {
-      setToastTitle(t('google.errorTitle'))
-      setToastText(err?.status && err.status < 500 && err.message ? err.message : t('common.errorText'))
-      setToastOpen(true)
+      showGoogleError(err?.status && err.status < 500 ? err.message : null)
     } finally {
       setGoogleBusy(false)
     }
-  }
+  })
+
+  // Google'ning haqiqiy tugmasi o'zimizning tugma ustiga shaffof joylanadi va uning
+  // o'lchamiga cho'ziladi (Google tugmasi eng ko'pi 400×40 px)
+  useEffect(() => {
+    const wrap = googleRef.current
+    const slot = googleSlot.current
+    if (!wrap || !slot) return
+    let cleanup = null
+    let cancelled = false
+
+    const fit = () => {
+      slot.style.setProperty('--sx', wrap.offsetWidth / GOOGLE_BUTTON_WIDTH)
+      slot.style.setProperty('--sy', wrap.offsetHeight / GOOGLE_BUTTON_HEIGHT)
+    }
+    const observer = new ResizeObserver(fit)
+    observer.observe(wrap)
+    fit()
+
+    renderGoogleButton(slot, { locale: lang, onCredential: (token) => onGoogleCredential(token) })
+      .then((dispose) => {
+        if (cancelled) dispose()
+        else {
+          cleanup = dispose
+          setGoogleReady(true)
+        }
+      })
+      .catch(() => setGoogleReady(false))
+
+    return () => {
+      cancelled = true
+      observer.disconnect()
+      cleanup?.()
+    }
+  }, [lang])
 
   // raw — bitta raqam yoki joylashtirilgan (paste/autofill) butun kod
   const fill = (index, raw) => {
@@ -239,16 +272,25 @@ function CodeLoginForm({ onVerified }) {
           <span>{t('common.or')}</span>
         </div>
 
-        <button
-          type="button"
-          className="btn-google"
-          onClick={handleGoogle}
-          disabled={googleBusy || locked}
-          aria-busy={googleBusy}
+        <div
+          className={googleBusy || locked ? 'google-auth is-busy' : 'google-auth'}
+          ref={googleRef}
         >
-          <GoogleIcon />
-          {t('code.google')}
-        </button>
+          {/* Google skripti yuklanmasa, bosilganda xato ko'rsatiladi */}
+          <button
+            type="button"
+            className="btn-google"
+            onClick={() => showGoogleError()}
+            disabled={googleBusy || locked}
+            aria-busy={googleBusy}
+            tabIndex={googleReady ? -1 : undefined}
+            aria-hidden={googleReady || undefined}
+          >
+            <GoogleIcon />
+            {t('code.google')}
+          </button>
+          <div className="google-auth__slot" ref={googleSlot} />
+        </div>
       </div>
 
       {toastOpen && (

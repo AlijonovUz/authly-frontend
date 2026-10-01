@@ -1,14 +1,12 @@
 // Backend bilan ishlash uchun umumiy fetch o'rami: manzil, JWT token, token yangilash va xatolar.
 
 // Masalan: VITE_API_URL=https://api.example.uz  (bo'sh bo'lsa — shu domenning o'zi, /api/...)
-const BASE_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
-
-// Lokal ishlashda manzil ham, proxy ham berilmasa so'rovlar Vite'ning o'ziga ketib 404 qaytaradi
-if (import.meta.env.DEV && !BASE_URL && !import.meta.env.VITE_API_PROXY) {
-  console.warn(
-    '[api] VITE_API_URL ham, VITE_API_PROXY ham berilmagan — /api so‘rovlari 404 qaytaradi. .env faylini to‘ldiring.',
-  )
-}
+// .env bo'lmasa yoki qiymat bo'sh bo'lsa (masalan, serverda build qilinganda) — production backend.
+// Bo'sh qolsa so'rov frontend domeniga ketib, nginx 405 qaytaradi.
+const BASE_URL = (import.meta.env.VITE_API_URL || 'https://backend-passport.raqamlinazorat.uz').replace(
+  /\/+$/,
+  '',
+)
 
 // Backend fayl manzilini nisbiy ("/media/...") qaytarsa, API domenini qo'shamiz
 export const mediaUrl = (path) => (path?.startsWith('/') ? `${BASE_URL}${path}` : path)

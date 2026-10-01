@@ -699,8 +699,36 @@
   transition: background-color 0.15s ease;
 }
 
-.btn-google:hover {
+.btn-google:hover,
+.google-auth:hover .btn-google:not(:disabled) {
   background: #ececec;
+}
+
+/* Google'ning haqiqiy tugmasi dizayndagi tugma ustida shaffof turadi */
+.google-auth {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.google-auth__slot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400px;
+  height: 40px;
+  opacity: 0.0001;
+  transform: scale(var(--sx, 1), var(--sy, 1));
+  transform-origin: top left;
+}
+
+.google-auth.is-busy .google-auth__slot {
+  pointer-events: none;
+}
+
+.google-auth:focus-within .btn-google {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
 }
 
 /* Profil */
