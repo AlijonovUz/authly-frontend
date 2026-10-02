@@ -1,5 +1,5 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { getMe, saveProfile } from '../../api/auth.js'
+import { getMe, isProfileComplete, saveProfile } from '../../api/auth.js'
 import { mediaUrl } from '../../api/client.js'
 import { getDistricts, getRegions } from '../../api/references.js'
 import { PlusIcon, UserIcon } from '../../components/icons.jsx'
@@ -98,6 +98,8 @@ function ProfileForm() {
   const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
   const [registered, setRegistered] = useState(false)
+  // Profil avval to'ldirilgan bo'lsa — bu tahrirlash: matnlar "to'ldiring" emas, "saqlash"
+  const [existing, setExisting] = useState(false)
   const [saveError, setSaveError] = useState(null) // { message } | null
   const [regions, setRegions] = useState([])
   const [loadedDistricts, setLoadedDistricts] = useState({ region: '', list: [] })
@@ -120,6 +122,7 @@ function ProfileForm() {
     getMe()
       .then((me) => {
         if (!active || !me) return
+        setExisting(isProfileComplete(me))
         setForm((f) => ({
           firstName: f.firstName || me.first_name || '',
           lastName: f.lastName || me.last_name || '',
@@ -187,13 +190,13 @@ function ProfileForm() {
     }
   }
 
-  if (registered) return <RegisteredView />
+  if (registered) return <RegisteredView updated={existing} />
 
   return (
     <form className="form form--profile" onSubmit={handleSubmit} noValidate>
       <div className="form__heading">
-        <h2 className="form__title">{t('profile.title')}</h2>
-        <p className="form__subtitle">{t('profile.subtitle')}</p>
+        <h2 className="form__title">{t(existing ? 'profile.editTitle' : 'profile.title')}</h2>
+        <p className="form__subtitle">{t(existing ? 'profile.editSubtitle' : 'profile.subtitle')}</p>
       </div>
 
       {saveError && (
@@ -268,7 +271,7 @@ function ProfileForm() {
         className="btn-primary btn-primary--lg"
         disabled={!isComplete || submitting}
       >
-        {t('profile.submit')}
+        {t(existing ? 'profile.save' : 'profile.submit')}
       </button>
     </form>
   )
