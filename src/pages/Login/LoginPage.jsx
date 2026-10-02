@@ -7,6 +7,7 @@ import PasswordLoginForm from './PasswordLoginForm.jsx'
 import PhoneLoginForm from './PhoneLoginForm.jsx'
 import ProfileForm from './ProfileForm.jsx'
 import { continueAfterLogin } from './session.js'
+import { getSourceSite } from '../../utils/sourceSite.js'
 import { useI18n } from '../../i18n/context.js'
 import './LoginPage.css'
 
@@ -20,14 +21,7 @@ const getRoute = () => {
 
 function LoginPage() {
   const [route, setRoute] = useState(getRoute)
-  // Avval kirgan foydalanuvchiga login formasi ko'rsatilmaydi — profilga yoki kelgan saytiga o'tkaziladi
-  const [resuming, setResuming] = useState(() => getRoute() !== 'profile' && isLoggedIn())
   const { t } = useI18n()
-
-  useEffect(() => {
-    if (!resuming) return
-    continueAfterLogin().finally(() => setResuming(false))
-  }, [resuming])
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRoute())
@@ -35,15 +29,20 @@ function LoginPage() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  // Profil sahifasi faqat kirgan foydalanuvchi uchun
-  const blocked = route === 'profile' && !isLoggedIn()
+  // Token bor — login formalari o'rniga profil; token yo'q — profil o'rniga login.
+  // Boshqa saytdan (SSO) kelgan bo'lsa, profil to'liq bo'lganda o'sha saytga qaytariladi.
+  const loggedIn = isLoggedIn()
+  const redirecting = loggedIn !== (route === 'profile')
   useEffect(() => {
-    if (blocked) window.location.hash = '#/'
-  }, [blocked])
+    if (!redirecting) return
+    if (!loggedIn) window.location.hash = '#/'
+    else if (getSourceSite()) continueAfterLogin()
+    else window.location.hash = '#/profile'
+  }, [redirecting, loggedIn])
 
   const forms = {
     code: <CodeLoginForm onVerified={continueAfterLogin} />,
-    profile: blocked ? null : <ProfileForm />,
+    profile: <ProfileForm />,
     phone: <PhoneLoginForm />,
     password: <PasswordLoginForm onLoggedIn={continueAfterLogin} />,
   }
@@ -58,7 +57,7 @@ function LoginPage() {
           <LanguageSelect />
         </header>
 
-        {resuming ? null : forms[route]}
+        {redirecting ? null : forms[route]}
 
         <p className="panel__footer">{t('footer.rights')}</p>
       </section>
