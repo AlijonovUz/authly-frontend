@@ -151,6 +151,8 @@ export async function request(path, { method = 'GET', body, query, auth = true }
   if (res.status === 401 && auth && tokens.refresh && (await refreshAccess())) {
     res = await send()
   }
+  // Token yangilanmadi — sessiya tugagan, eski tokenlar "kirgan" deb chalg'itmasin
+  if (res.status === 401 && auth) tokens.clear()
 
   const data = await parse(res)
   if (!res.ok || (isEnvelope(data) && data.success === false)) throw new ApiError(res.status, data)

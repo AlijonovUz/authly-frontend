@@ -20,7 +20,14 @@ const getRoute = () => {
 
 function LoginPage() {
   const [route, setRoute] = useState(getRoute)
+  // Avval kirgan foydalanuvchiga login formasi ko'rsatilmaydi — profilga yoki kelgan saytiga o'tkaziladi
+  const [resuming, setResuming] = useState(() => getRoute() !== 'profile' && isLoggedIn())
   const { t } = useI18n()
+
+  useEffect(() => {
+    if (!resuming) return
+    continueAfterLogin().finally(() => setResuming(false))
+  }, [resuming])
 
   useEffect(() => {
     const onHashChange = () => setRoute(getRoute())
@@ -51,7 +58,7 @@ function LoginPage() {
           <LanguageSelect />
         </header>
 
-        {forms[route]}
+        {resuming ? null : forms[route]}
 
         <p className="panel__footer">{t('footer.rights')}</p>
       </section>
