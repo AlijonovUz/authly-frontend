@@ -1,8 +1,8 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { getMe, isProfileComplete, saveProfile } from '../../api/auth.js'
+import { getMe, isProfileComplete, logout, saveProfile } from '../../api/auth.js'
 import { mediaUrl } from '../../api/client.js'
 import { getDistricts, getRegions } from '../../api/references.js'
-import { PlusIcon, UserIcon } from '../../components/icons.jsx'
+import { LogOutIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { Field, FormAlert } from './FormParts.jsx'
 import DateField from './DateField.jsx'
@@ -97,6 +97,7 @@ function ProfileForm() {
   const [submitted, setSubmitted] = useState(false)
   const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
   const [registered, setRegistered] = useState(false)
   // Profil avval to'ldirilgan bo'lsa — bu tahrirlash: matnlar "to'ldiring" emas, "saqlash"
   const [existing, setExisting] = useState(false)
@@ -190,6 +191,18 @@ function ProfileForm() {
     }
   }
 
+  // Sessiyani yopib, boshqa akkaunt bilan kirish uchun login sahifasiga qaytaradi
+  const handleLogout = async () => {
+    if (loggingOut) return
+    setLoggingOut(true)
+    try {
+      await logout()
+    } catch {
+      // Backend javob bermasa ham tokenlar o'chirildi — baribir chiqamiz
+    }
+    window.location.hash = '#/'
+  }
+
   if (registered) return <RegisteredView updated={existing} />
 
   return (
@@ -266,13 +279,24 @@ function ProfileForm() {
         />
       </div>
 
-      <button
-        type="submit"
-        className="btn-primary btn-primary--lg"
-        disabled={!isComplete || submitting}
-      >
-        {t(existing ? 'profile.save' : 'profile.submit')}
-      </button>
+      <div className="profile__actions">
+        <button
+          type="submit"
+          className="btn-primary btn-primary--lg"
+          disabled={!isComplete || submitting || loggingOut}
+        >
+          {t(existing ? 'profile.save' : 'profile.submit')}
+        </button>
+        <button
+          type="button"
+          className="btn-logout"
+          onClick={handleLogout}
+          disabled={loggingOut || submitting}
+        >
+          <LogOutIcon width="18" height="18" />
+          {t('profile.logout')}
+        </button>
+      </div>
     </form>
   )
 }
