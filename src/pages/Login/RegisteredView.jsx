@@ -17,7 +17,8 @@ const initials = (name) =>
 
 // Ro'yxatdan o'tish yakunlangach chiqadigan xabar. Kelgan sayt aniqlansa — unga qaytish tugmasi
 // va avtomatik yo'naltirish, aniqlanmasa — faqat xabar.
-function RegisteredView() {
+// updated: mavjud profil tahrirlangan bo'lsa "ro'yxatdan o'tdingiz" o'rniga "saqlandi" deyiladi.
+function RegisteredView({ updated = false }) {
   const { t, lang } = useI18n()
   const [source] = useState(getSourceSite)
   const [seconds, setSeconds] = useState(REDIRECT_SECONDS)
@@ -60,8 +61,8 @@ function RegisteredView() {
       </span>
 
       <div className="form__heading" role="status">
-        <h2 className="form__title">{t('registered.title')}</h2>
-        <p className="form__subtitle registered__text">{t('registered.text')}</p>
+        <h2 className="form__title">{t(updated ? 'saved.title' : 'registered.title')}</h2>
+        <p className="form__subtitle registered__text">{t(updated ? 'saved.text' : 'registered.text')}</p>
       </div>
 
       {source && (
