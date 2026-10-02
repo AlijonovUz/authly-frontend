@@ -1588,7 +1588,48 @@
   background: var(--bg-subtle);
 }
 
+.profile__actions {
+  display: flex;
+  gap: 12px;
+}
+
+.profile__actions .btn-primary {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn-logout {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 60px;
+  padding: 0 24px;
+  border: 1px solid var(--border-sub);
+  border-radius: 16px;
+  background: var(--bg-surface);
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 100%;
+  color: var(--status-danger-strong);
+  white-space: nowrap;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-logout:hover:not(:disabled) {
+  border-color: var(--status-danger);
+  background: var(--status-danger-bg);
+}
+
+.btn-logout:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-primary:focus-visible,
+.btn-logout:focus-visible,
 .btn-pill:focus-visible,
 .btn-google:focus-visible,
 .lang__trigger:focus-visible,
@@ -1741,7 +1782,7 @@
   .profile__row--names {
     grid-template-columns: 1fr;
   }
-  .form--profile .btn-primary {
+  .form--profile .profile__actions {
     margin-top: auto;
   }
   /* Tugma va oxirgi maydon orasida kamida 24px qoladi */
