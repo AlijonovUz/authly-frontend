@@ -1,4 +1,5 @@
 import { request, tokens } from './client.js'
+import { clearCachedApplications } from './sso.js'
 
 const AUTH = '/api/v1/accounts/auth'
 
@@ -35,25 +36,62 @@ export async function googleLogin(idToken) {
   return data
 }
 
+const USER_KEY = 'authly.user'
+let userMemory = null
+
+export function getCachedUser() {
+  if (userMemory) return userMemory
+  try {
+    const raw = localStorage.getItem(USER_KEY)
+    if (raw) {
+      userMemory = JSON.parse(raw)
+      return userMemory
+    }
+  } catch {}
+  return null
+}
+
+export function setCachedUser(user) {
+  userMemory = user ?? null
+  try {
+    if (user == null) {
+      localStorage.removeItem(USER_KEY)
+    } else {
+      localStorage.setItem(USER_KEY, JSON.stringify(user))
+    }
+  } catch {}
+}
+
+// Barcha avtorizatsiya va profil keshlarini tozalash
+export function clearAllAuthCaches() {
+  tokens.clear()
+  setCachedUser(null)
+  clearCachedApplications()
+}
+
 // Tizimdan chiqish (refresh tokenni blacklistga kiritish va xotirani tozalash)
 export async function logout() {
   const refresh = tokens.refresh
   try {
     if (refresh) await request(`${AUTH}/logout/`, { method: 'POST', body: { refresh } })
   } finally {
-    tokens.clear()
+    clearAllAuthCaches()
   }
 }
 
 // Joriy foydalanuvchi profilini olish
-export const getMe = () => request('/api/v1/accounts/me/')
+export async function getMe() {
+  const me = await request('/api/v1/accounts/me/')
+  if (me) setCachedUser(me)
+  return me
+}
 
 // Profilda viloyat, tuman va tug'ilgan sana bo'lsa — to'ldirilgan hisoblanadi
 export const isProfileComplete = (me) =>
   Boolean(me?.first_name && me?.last_name && me?.region_info && me?.district_info && me?.birth_date)
 
 // Profil ma'lumotlarini yangilash
-export function saveProfile({ firstName, lastName, region, district, birthDate, photo }) {
+export async function saveProfile({ firstName, lastName, region, district, birthDate, photo }) {
   const [d, m, y] = birthDate.split('.')
   const fields = {
     first_name: firstName.trim(),
@@ -70,7 +108,9 @@ export function saveProfile({ firstName, lastName, region, district, birthDate, 
     Object.entries(fields).forEach(([key, value]) => body.append(key, value))
     body.append('avatar', photo)
   }
-  return request('/api/v1/accounts/me/', { method: 'PATCH', body })
+  const updated = await request('/api/v1/accounts/me/', { method: 'PATCH', body })
+  if (updated) setCachedUser(updated)
+  return updated
 }
 
 // Profilga telefon raqam bog'lash (Telegram botdan olingan kod bilan)

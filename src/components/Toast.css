@@ -16,10 +16,25 @@
   animation: toast-in 0.2s ease-out;
 }
 
+.toast--success {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.toast--error {
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
 .toast__icon {
   flex-shrink: 0;
   margin-top: 2px;
-  color: var(--orange-9);
+}
+
+.toast__icon--error {
+  color: var(--orange-9, #ef4444);
+}
+
+.toast__icon--success {
+  color: #10b981;
 }
 
 .toast__title {

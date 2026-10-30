@@ -69,7 +69,7 @@ function RegisteredView({ updated = false, onBack, onLogout }) {
     return () => clearTimeout(timer)
   }, [source, seconds])
 
-  const name = source?.service?.title[lang] ?? source?.host
+  const name = source?.service?.title?.[lang] ?? source?.host ?? ''
 
   return (
     <div className="form registered">

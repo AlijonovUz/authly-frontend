@@ -193,10 +193,10 @@
   --u: max(1px, 0.5cqw);
   display: flex;
   flex-direction: column;
-  gap: calc(6 * var(--u));
+  gap: calc(5 * var(--u));
   height: 100%;
-  min-height: calc(135.57 * var(--u));
-  padding: calc(12.76 * var(--u));
+  min-height: calc(108 * var(--u));
+  padding: calc(11 * var(--u));
   border-radius: calc(10.63 * var(--u));
   position: relative;
   isolation: isolate;
@@ -242,15 +242,32 @@
 .service__title {
   font-family: var(--font-unbounded);
   font-weight: 600;
-  font-size: calc(12.76 * var(--u));
+  font-size: calc(12 * var(--u));
   line-height: 125%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
 }
 
 .service__text {
   font-family: var(--font-manrope);
   font-weight: 500;
   font-size: calc(7.97 * var(--u));
-  line-height: 113.4%;
+  line-height: calc(11.5 * var(--u));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: var(--text-muted);
+  transition: color 0.5s ease;
+}
+
+.service:hover .service__text,
+.service:focus-visible .service__text {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .service__footer {
@@ -709,6 +726,34 @@
 .btn-google:hover,
 .google-auth:hover .btn-google:not(:disabled) {
   background: #ececec;
+}
+
+.btn-back-profile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 60px;
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--bg-muted);
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 100%;
+  color: var(--text-strong);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-back-profile:hover {
+  background: #ececec;
+}
+
+.btn-back-profile:focus-visible {
+  outline: 2px solid var(--accent-default);
+  outline-offset: 2px;
 }
 
 /* Google'ning haqiqiy tugmasi dizayndagi tugma ustida shaffof turadi */
@@ -1644,6 +1689,235 @@
 
 .label-short {
   display: none;
+}
+
+/* Bog'langan hisoblar (Account linking) */
+.linked-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.linked-accounts__header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.linked-accounts__title {
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 20px;
+  color: var(--text-strong);
+}
+
+.linked-accounts__subtitle {
+  font-family: var(--font-manrope);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--text-faint);
+}
+
+.linked-accounts__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.linked-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  background: var(--bg-subtle);
+  transition: border-color 0.15s ease;
+}
+
+.linked-card.is-linked {
+  background: var(--bg-surface);
+  border-color: var(--border-subtle);
+}
+
+.linked-card__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.linked-card__info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.linked-card__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+}
+
+.linked-card__icon--telegram {
+  color: var(--telegram, #229ed9);
+}
+
+.linked-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.linked-card__name {
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--text-strong);
+}
+
+.linked-card__detail {
+  font-family: var(--font-manrope);
+  font-size: 13px;
+  line-height: 16px;
+  color: var(--text-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.linked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #e6f6ec;
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 100%;
+  color: #107538;
+  white-space: nowrap;
+}
+
+.btn-link-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid var(--border-sub);
+  border-radius: 12px;
+  background: var(--bg-surface);
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 100%;
+  color: var(--text-strong);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.btn-link-action:hover {
+  background: var(--bg-muted);
+  border-color: var(--accent-default);
+  color: var(--accent-default);
+}
+
+.btn-link-action--telegram {
+  border-color: #229ed9;
+  color: #229ed9;
+}
+
+.btn-link-action--telegram:hover {
+  background: #f0f9ff;
+  border-color: #1b8cc2;
+  color: #1b8cc2;
+}
+
+.linked-card__hint {
+  font-family: var(--font-manrope);
+  font-size: 12px;
+  line-height: 17px;
+  color: var(--text-faint);
+  margin: 0;
+}
+
+.telegram-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border-subtle);
+}
+
+.telegram-prompt__row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.telegram-prompt__input {
+  flex: 1;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--border-sub);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  font-family: var(--font-manrope);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 2px;
+  color: var(--text-strong);
+  outline: none;
+}
+
+.telegram-prompt__input:focus {
+  border-color: var(--accent-default);
+}
+
+.btn-sm-primary {
+  height: 42px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent-default);
+  font-family: var(--font-manrope);
+  font-weight: 700;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-sm-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-sm-cancel {
+  height: 42px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-manrope);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text-faint);
+  cursor: pointer;
 }
 
 /* ---------- Responsive ---------- */

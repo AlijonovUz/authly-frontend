@@ -59,18 +59,24 @@ const isEnvelope = (body) =>
 export class ApiError extends Error {
   constructor(status, body) {
     const error = isEnvelope(body) ? body.error : null
-    // Maydon xatosi ("Kod noto'g'ri yoki muddati o'tgan.") umumiy matndan aniqroq
-    super(errorMessage(error?.details) ?? error?.errorMsg ?? errorMessage(body) ?? `HTTP ${status}`)
+    const fieldMsg = errorMessage(error?.details)
+    const generalMsg =
+      typeof error?.errorMsg === 'string' && error.errorMsg.trim() ? error.errorMsg.trim() : null
+
+    // Maydon xatosi ("Bu telefon raqam allaqachon...") umumiy matndan aniqroq
+    super(fieldMsg ?? generalMsg ?? errorMessage(body) ?? `HTTP ${status}`)
     this.status = status
     this.code = error?.errorCode ?? body?.code ?? null
-    // Qo'shimcha ma'lumot (masalan, attempts_left) — details ichida
+    this.errorMsg = generalMsg
+    this.details = error?.details && typeof error.details === 'object' ? error.details : null
+    // Qo'shimcha ma'lumot (masalan, attempts_left) — details ichida yoki body
     this.data = error?.details ?? body
   }
 }
 
 // DRF xatolaridan foydalanuvchiga ko'rsatsa bo'ladigan birinchi matnni oladi:
-// { detail: '...' } | { message: '...' } | { field: ['...'] } | ['...']
-function errorMessage(data) {
+// { detail: '...' } | { message: '...' } | { [field]: '...' } | { [field]: ['...'] } | ['...']
+export function errorMessage(data) {
   if (!data) return null
   if (typeof data === 'string') return data.length < 300 ? data : null
   if (Array.isArray(data)) return errorMessage(data[0])
@@ -85,6 +91,85 @@ function errorMessage(data) {
     }
   }
   return null
+}
+
+// Har qanday backend xatosidan toza xato matnini oladi
+export function getApiErrorMessage(err, fallback = null) {
+  if (!err) return fallback
+  if (typeof err === 'string') return err
+
+  // 1. err.details yoki err.data bo'lsa (details ichidagi { [field]: 'matn' | ['matn'] })
+  if (err.details && typeof err.details === 'object') {
+    const fromDetails = errorMessage(err.details)
+    if (fromDetails) return fromDetails
+  }
+  if (err.data && typeof err.data === 'object') {
+    const fromData = errorMessage(err.data)
+    if (fromData) return fromData
+  }
+
+  // 2. err.message (ApiError ichidagi matn)
+  if (err.message && !err.message.startsWith('HTTP ')) {
+    return err.message
+  }
+
+  // 3. err.errorMsg (backend yuborgan umumiy xabar)
+  if (err.errorMsg && typeof err.errorMsg === 'string') {
+    return err.errorMsg
+  }
+
+  return fallback ?? err.message ?? null
+}
+
+// Toast sarlavhasi (title) va matnini (message) ajratib oladi:
+// Backend yuborgan errorMsg umumiy sarlavha, details ichidagi field xatosi esa asosiy matn bo'ladi.
+export function getApiErrorToast(err, { defaultTitle = 'Xatolik', defaultMessage = null } = {}) {
+  if (!err) {
+    return { title: defaultTitle, message: defaultMessage }
+  }
+  if (typeof err === 'string') {
+    return { title: defaultTitle, message: err }
+  }
+
+  const fieldMsg =
+    (err.details && typeof err.details === 'object' && errorMessage(err.details)) ||
+    (err.data && typeof err.data === 'object' && errorMessage(err.data)) ||
+    (err.message && !err.message.startsWith('HTTP ') ? err.message : null)
+
+  const generalMsg =
+    typeof err.errorMsg === 'string' && err.errorMsg.trim() ? err.errorMsg.trim() : null
+
+  // 1. Ikkalasi ham mavjud va har xil bo'lsa:
+  // Title = generalMsg ("Ma'lumotlarni tekshirishda xatolik yuzaga keldi.")
+  // Message = fieldMsg ("Bu telefon raqam allaqachon boshqa akkauntga biriktirilgan.")
+  if (generalMsg && fieldMsg && generalMsg !== fieldMsg) {
+    return {
+      title: generalMsg,
+      message: fieldMsg,
+    }
+  }
+
+  // 2. Faqat maydon xatosi bo'lsa:
+  if (fieldMsg) {
+    return {
+      title: defaultTitle,
+      message: fieldMsg,
+    }
+  }
+
+  // 3. Faqat umumiy xabar bo'lsa:
+  if (generalMsg) {
+    return {
+      title: defaultTitle,
+      message: generalMsg,
+    }
+  }
+
+  // 4. Standart xatolik
+  return {
+    title: defaultTitle,
+    message: defaultMessage ?? err.message ?? null,
+  }
 }
 
 async function parse(res) {

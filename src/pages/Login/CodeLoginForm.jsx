@@ -3,6 +3,7 @@ import {
   googleLogin,
   telegramLogin,
 } from '../../api/auth.js'
+import { getApiErrorToast } from '../../api/client.js'
 import { GoogleIcon } from '../../components/icons.jsx'
 import Toast from '../../components/Toast.jsx'
 import { useI18n } from '../../i18n/context.js'
@@ -11,7 +12,7 @@ import {
   GOOGLE_BUTTON_WIDTH,
   renderGoogleButton,
 } from '../../utils/googleAuth.js'
-import { clearPending, getPending } from './pendingVerification.js'
+import { clearPending } from './pendingVerification.js'
 
 const LENGTH = 6
 const SUCCESS_DELAY = 700
@@ -90,9 +91,12 @@ function CodeLoginForm({ onVerified }) {
         focusAt(0)
       }
     } catch (err) {
-      // Tarmoq yoki server xatosi — "kod noto'g'ri" emas
-      setToastTitle(null)
-      setToastText(err?.status && err.status < 500 ? null : t('common.errorText'))
+      const { title, message } = getApiErrorToast(err, {
+        defaultTitle: t('code.invalidTitle'),
+        defaultMessage: t('code.invalidText'),
+      })
+      setToastTitle(title)
+      setToastText(message)
       setStatus('error')
       setToastOpen(true)
       focusAt(0)
@@ -129,7 +133,13 @@ function CodeLoginForm({ onVerified }) {
       clearPending()
       await onVerified()
     } catch (err) {
-      showGoogleError(err?.status && err.status < 500 ? err.message : null)
+      const { title, message } = getApiErrorToast(err, {
+        defaultTitle: t('google.errorTitle'),
+        defaultMessage: t('common.errorText'),
+      })
+      setToastTitle(title)
+      setToastText(message)
+      setToastOpen(true)
     } finally {
       setGoogleBusy(false)
     }

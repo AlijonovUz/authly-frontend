@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { ArrowUpRightIcon } from '../../components/icons.jsx'
-import { SERVICES } from '../../data/services.js'
 import { useI18n } from '../../i18n/context.js'
 
 const FEATURES = ['secure', 'fast', 'reliable']
@@ -69,8 +68,13 @@ function useAutoScroll(ref) {
       const dt = Math.min(now - last, 100)
       last = now
       const items = el.children
+      if (!items || items.length < 2) {
+        frame = requestAnimationFrame(tick)
+        return
+      }
+      const half = Math.floor(items.length / 2)
       // Bitta nusxaning balandligi (qatorlar orasidagi masofa bilan)
-      const period = items[items.length / 2].offsetTop - items[0].offsetTop
+      const period = items[half] ? items[half].offsetTop - items[0].offsetTop : 0
       const from = paused ? el.scrollTop : pos
       pos = paused ? from : from + (SCROLL_SPEED * dt) / 1000
       if (period > 0) {
@@ -98,6 +102,16 @@ function useAutoScroll(ref) {
   }, [ref])
 }
 
+// "https://meetly.uz/..." → "meetly.uz"
+function formatUrl(rawUrl = '') {
+  try {
+    const url = new URL(rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`)
+    return url.hostname.replace(/^www\./, '')
+  } catch {
+    return rawUrl.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0]
+  }
+}
+
 // Sichqoncha kartaga kirgan/chiqqan nuqta — hover foni shu yerdan yoyiladi (CSS: --x, --y)
 function setHoverOrigin(e) {
   const card = e.currentTarget
@@ -107,33 +121,56 @@ function setHoverOrigin(e) {
 }
 
 // Profil sahifasi: sarlavha va o'zi aylanadigan xizmatlar ro'yxati
-export function ServicesHero() {
-  const { lang } = useI18n()
+export function ServicesHero({ apps = [] }) {
   const listRef = useRef(null)
-  useAutoScroll(listRef)
 
-  // Ikkinchi nusxa faqat uzluksiz aylanish uchun — ekran o'quvchi va Tab uni ko'rmaydi
-  const cards = [...SERVICES, ...SERVICES]
+  // Faqat backend'dan kelgan real hamkor ilovalari ko'rsatiladi
+  const sourceList = useMemo(() => {
+    if (Array.isArray(apps) && apps.length > 0) {
+      return apps.map((app) => ({
+        name: app.name,
+        description: app.description || '',
+        url: formatUrl(app.url),
+        href: app.url ? (app.url.startsWith('http') ? app.url : `https://${app.url}`) : '#',
+      }))
+    }
+    return []
+  }, [apps])
+
+  // Karusel bir maromda aylanishi uchun ro'yxatni kamida 12 tagacha to'ldiramiz
+  const baseCards = useMemo(() => {
+    if (!sourceList.length) return []
+    let list = sourceList
+    while (list.length < 12) {
+      list = [...list, ...sourceList]
+    }
+    return list
+  }, [sourceList])
+
+  // Cheksiz aylanish uchun 2 nusxa (useAutoScroll)
+  const cards = useMemo(() => [...baseCards, ...baseCards], [baseCards])
+
+  useAutoScroll(listRef)
 
   return (
     <section className="login__hero login__hero--services">
       <Intro />
       <ul className="services" ref={listRef}>
         {cards.map((s, i) => {
-          const isCopy = i >= SERVICES.length
+          const isCopy = i >= baseCards.length
           return (
             <li key={i} style={{ '--i': i }} aria-hidden={isCopy || undefined}>
               <a
                 className="service"
-                href={`https://${s.url}`}
+                href={s.href}
                 target="_blank"
                 rel="noreferrer"
                 tabIndex={isCopy ? -1 : undefined}
                 onMouseEnter={setHoverOrigin}
                 onMouseLeave={setHoverOrigin}
               >
-                <h3 className="service__title">{s.title[lang]}</h3>
-                <p className="service__text">{s.text[lang]}</p>
+                <h3 className="service__title">{s.name}</h3>
+                <p className="service__text">{s.description}</p>
                 <span className="service__footer">
                   <span className="service__link">{s.url}</span>
                   <span className="service__arrow" aria-hidden="true">

@@ -1,4 +1,4 @@
-import { DOMAIN, SERVICES } from '../data/services.js'
+const DOMAIN = import.meta.env.VITE_AUTH_DOMAIN || 'authly.uz'
 
 const isOurHost = (host) => host === DOMAIN || host.endsWith(`.${DOMAIN}`)
 
@@ -43,11 +43,10 @@ function readSource() {
   return null
 }
 
-// { url, host, service, sso } yoki null. service — SERVICES ro'yxatidagi mos yozuv (topilmasa null)
+// { url, host, sso } yoki null
 export function getSourceSite() {
   const source = readSource()
   if (!source) return null
   const host = source.url.hostname
-  const service = SERVICES.find((s) => s.url === host) ?? null
-  return { url: source.url.href, host, service, sso: source.sso }
+  return { url: source.url.href, host, sso: source.sso }
 }

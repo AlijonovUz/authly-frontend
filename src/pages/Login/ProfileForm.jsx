@@ -1,11 +1,13 @@
 import { useEffect, useState, useSyncExternalStore } from 'react'
-import { getMe, isProfileComplete, logout, saveProfile } from '../../api/auth.js'
-import { mediaUrl } from '../../api/client.js'
-import { getDistricts, getRegions } from '../../api/references.js'
+import { clearAllAuthCaches, getCachedUser, getMe, isProfileComplete, logout, saveProfile, setCachedUser } from '../../api/auth.js'
+import { getApiErrorMessage, mediaUrl } from '../../api/client.js'
+import { getCachedDistricts, getCachedRegions, getDistricts, getRegions } from '../../api/references.js'
+import { getPublicApplications } from '../../api/sso.js'
 import { LogOutIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { Field, FormAlert } from './FormParts.jsx'
 import DateField from './DateField.jsx'
+import LinkedAccounts from './LinkedAccounts.jsx'
 import RegisteredView from './RegisteredView.jsx'
 import SearchSelect from './SearchSelect.jsx'
 
@@ -86,24 +88,44 @@ function AvatarPicker({ photoUrl, onChange }) {
 }
 
 function ProfileForm() {
-  const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
-    region: '',
-    district: '',
-    birthDate: '',
-  })
-  const [photo, setPhoto] = useState(null) // { file, url }
+  const cachedUser = getCachedUser()
+
+  const [form, setForm] = useState(() => ({
+    firstName: cachedUser?.first_name || '',
+    lastName: cachedUser?.last_name || '',
+    region: cachedUser?.region_info?.id || '',
+    district: cachedUser?.district_info?.id || '',
+    birthDate: fromApiDate(cachedUser?.birth_date) || '',
+  }))
+  const [photo, setPhoto] = useState(() =>
+    cachedUser?.avatar
+      ? { file: null, url: mediaUrl(cachedUser.avatar), remote: true }
+      : null,
+  )
   const [submitted, setSubmitted] = useState(false)
   const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [registered, setRegistered] = useState(false)
+  const [currentUser, setCurrentUser] = useState(cachedUser)
   // Profil avval to'ldirilgan bo'lsa — bu tahrirlash: matnlar "to'ldiring" emas, "saqlash"
-  const [existing, setExisting] = useState(false)
+  const [existing, setExisting] = useState(() => isProfileComplete(cachedUser))
   const [saveError, setSaveError] = useState(null) // { message } | null
-  const [regions, setRegions] = useState([])
-  const [loadedDistricts, setLoadedDistricts] = useState({ region: '', list: [] })
+  const [regions, setRegions] = useState(() => {
+    const cached = getCachedRegions()
+    if (cached?.length) return cached
+    if (cachedUser?.region_info) return [cachedUser.region_info]
+    return []
+  })
+  const [loadedDistricts, setLoadedDistricts] = useState(() => {
+    const rId = cachedUser?.region_info?.id
+    if (rId) {
+      const cached = getCachedDistricts(rId)
+      if (cached?.length) return { region: rId, list: cached }
+      if (cachedUser?.district_info) return { region: rId, list: [cachedUser.district_info] }
+    }
+    return { region: '', list: [] }
+  })
   // Boshqa viloyat tanlangan bo'lsa eski ro'yxat ko'rinmaydi
   const districts = loadedDistricts.region === form.region ? loadedDistricts.list : []
   const { t } = useI18n()
@@ -118,11 +140,15 @@ function ProfileForm() {
   useEffect(() => {
     let active = true
     getRegions()
-      .then((list) => active && setRegions(list))
+      .then((list) => {
+        if (!active || !Array.isArray(list)) return
+        setRegions(list)
+      })
       .catch(() => {})
     getMe()
       .then((me) => {
         if (!active || !me) return
+        setCurrentUser(me)
         setExisting(isProfileComplete(me))
         setForm((f) => ({
           firstName: f.firstName || me.first_name || '',
@@ -131,11 +157,16 @@ function ProfileForm() {
           district: f.district || me.district_info?.id || '',
           birthDate: f.birthDate || fromApiDate(me.birth_date),
         }))
-        if (me.avatar) setPhoto((p) => p ?? { file: null, url: mediaUrl(me.avatar), remote: true })
+        if (me.avatar) {
+          setPhoto((p) => (p?.file ? p : { file: null, url: mediaUrl(me.avatar), remote: true }))
+        }
       })
       .catch((err) => {
         // Sessiya tugagan — qaytadan kirish kerak
-        if (err?.status === 401) window.location.hash = '#/'
+        if (err?.status === 401) {
+          clearAllAuthCaches()
+          window.location.hash = '#/'
+        }
       })
     return () => {
       active = false
@@ -147,6 +178,10 @@ function ProfileForm() {
     if (!form.region) return
     let active = true
     const region = form.region
+    const cached = getCachedDistricts(region)
+    if (cached?.length) {
+      setLoadedDistricts({ region, list: cached })
+    }
     getDistricts(region)
       .then((list) => active && setLoadedDistricts({ region, list }))
       .catch(() => {})
@@ -178,15 +213,21 @@ function ProfileForm() {
     setSubmitting(true)
     setSaveError(null)
     try {
-      await saveProfile({ ...form, photo: photo?.file ?? null })
+      const updated = await saveProfile({ ...form, photo: photo?.file ?? null })
       setExisting(true)
+      if (updated) {
+        setCurrentUser(updated)
+        setCachedUser(updated)
+      }
+      getPublicApplications().catch(() => {})
       setRegistered(true)
     } catch (err) {
       if (err?.status === 401) {
+        clearAllAuthCaches()
         window.location.hash = '#/'
         return
       }
-      setSaveError({ message: err?.status && err.status < 500 ? err.message : null })
+      setSaveError({ message: getApiErrorMessage(err, t('common.errorText')) })
     } finally {
       setSubmitting(false)
     }
@@ -287,6 +328,16 @@ function ProfileForm() {
           error={errors.birthDate}
         />
       </div>
+
+      {currentUser && (
+        <LinkedAccounts
+          user={currentUser}
+          onUserUpdated={(updatedUser) => {
+            setCurrentUser(updatedUser)
+            setCachedUser(updatedUser)
+          }}
+        />
+      )}
 
       <div className="profile__actions">
         <button
