@@ -1,4 +1,6 @@
 // Interfeys matnlari. Yangi kalit qo'shilganda uchala tilga ham yozilsin.
+const CURRENT_YEAR = new Date().getFullYear()
+
 export const TRANSLATIONS = {
   uz: {
     'hero.title': 'Authly tizimiga xush kelibsiz',
@@ -10,7 +12,7 @@ export const TRANSLATIONS = {
     'feature.fast.text': 'Bir marta roʻyxatdan oʻting, barcha xizmatlarga kiring.',
     'feature.reliable.title': 'Ishonchli',
     'feature.reliable.text': 'Telegram bot yoki email orqali xavfsiz tasdiqlash.',
-    'footer.rights': '© 2026 Authly. Barcha huquqlar himoyalangan.',
+    'footer.rights': `© ${CURRENT_YEAR} Authly. Barcha huquqlar himoyalangan.`,
     'lang.label': 'Til',
 
     'common.or': 'yoki',
@@ -121,7 +123,7 @@ export const TRANSLATIONS = {
     'feature.fast.text': 'Зарегистрируйтесь один раз — входите во все сервисы.',
     'feature.reliable.title': 'Надёжно',
     'feature.reliable.text': 'Безопасное подтверждение через Telegram-бот или email.',
-    'footer.rights': '© 2026 Authly. Все права защищены.',
+    'footer.rights': `© ${CURRENT_YEAR} Authly. Все права защищены.`,
     'lang.label': 'Язык',
 
     'common.or': 'или',
@@ -231,7 +233,7 @@ export const TRANSLATIONS = {
     'feature.fast.text': 'Sign up once and access every service.',
     'feature.reliable.title': 'Reliable',
     'feature.reliable.text': 'Secure verification via Telegram bot or email.',
-    'footer.rights': '© 2026 Authly. All rights reserved.',
+    'footer.rights': `© ${CURRENT_YEAR} Authly. All rights reserved.`,
     'lang.label': 'Language',
 
     'common.or': 'or',
