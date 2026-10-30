@@ -1,7 +1,7 @@
 // Interfeys matnlari. Yangi kalit qo'shilganda uchala tilga ham yozilsin.
 export const TRANSLATIONS = {
   uz: {
-    'hero.title': 'Passport tizimiga xush kelibsiz',
+    'hero.title': 'Authly tizimiga xush kelibsiz',
     'hero.subtitle':
       'Yagona raqamli profilingiz orqali barcha xizmatlardan xavfsiz va tez foydalaning.',
     'feature.secure.title': 'Xavfsiz',
@@ -10,7 +10,7 @@ export const TRANSLATIONS = {
     'feature.fast.text': 'Bir marta roʻyxatdan oʻting, barcha xizmatlarga kiring.',
     'feature.reliable.title': 'Ishonchli',
     'feature.reliable.text': 'Telegram bot yoki email orqali xavfsiz tasdiqlash.',
-    'footer.rights': '© 2026 Passport. Barcha huquqlar himoyalangan.',
+    'footer.rights': '© 2026 Authly. Barcha huquqlar himoyalangan.',
     'lang.label': 'Til',
 
     'common.or': 'yoki',
@@ -82,17 +82,19 @@ export const TRANSLATIONS = {
     'profile.save': 'Saqlash',
     'profile.logout': 'Chiqish',
     'saved.title': 'Maʼlumotlaringiz saqlandi!',
-    'saved.text': 'Profilingiz yangilandi. Raqamli Nazorat loyihalarida yangi maʼlumotlaringiz koʻrinadi.',
+    'saved.text': 'Profilingiz yangilandi. Barcha ulangan loyiha va xizmatlarda yangi maʼlumotlaringiz koʻrinadi.',
     'registered.title': 'Roʻyxatdan oʻtdingiz!',
     'registered.text':
-      'Passport profilingiz tayyor. Endi Raqamli Nazorat loyihalarining barchasiga shu bitta profil orqali kirasiz — qayta roʻyxatdan oʻtish shart emas.',
+      'Authly profilingiz tayyor. Endi barcha hamkor loyiha va xizmatlarga shu bitta profil orqali kirasiz — qayta roʻyxatdan oʻtish shart emas.',
     'registered.source': 'Siz kelgan sayt',
     'registered.back': '{name}ga qaytish',
     'registered.redirect': '{n} soniyadan soʻng avtomatik qaytasiz',
+    'registered.toProfile': 'Profilga qaytish',
+    'registered.editProfile': 'Profilni tahrirlash',
   },
 
   ru: {
-    'hero.title': 'Добро пожаловать в систему Passport',
+    'hero.title': 'Добро пожаловать в систему Authly',
     'hero.subtitle':
       'Пользуйтесь всеми сервисами безопасно и быстро с единым цифровым профилем.',
     'feature.secure.title': 'Безопасно',
@@ -101,7 +103,7 @@ export const TRANSLATIONS = {
     'feature.fast.text': 'Зарегистрируйтесь один раз — входите во все сервисы.',
     'feature.reliable.title': 'Надёжно',
     'feature.reliable.text': 'Безопасное подтверждение через Telegram-бот или email.',
-    'footer.rights': '© 2026 Passport. Все права защищены.',
+    'footer.rights': '© 2026 Authly. Все права защищены.',
     'lang.label': 'Язык',
 
     'common.or': 'или',
@@ -173,17 +175,19 @@ export const TRANSLATIONS = {
     'profile.save': 'Сохранить',
     'profile.logout': 'Выйти',
     'saved.title': 'Данные сохранены!',
-    'saved.text': 'Ваш профиль обновлён. Новые данные будут видны во всех проектах Raqamli Nazorat.',
+    'saved.text': 'Ваш профиль обновлён. Новые данные будут видны во всех подключённых проектах и сервисах.',
     'registered.title': 'Вы зарегистрированы!',
     'registered.text':
-      'Ваш профиль Passport готов. Теперь вы входите во все проекты Raqamli Nazorat с этим единым профилем — повторная регистрация не нужна.',
+      'Ваш профиль Authly готов. Теперь вы входите во все партнёрские проекты и сервисы с этим единым профилем — повторная регистрация не нужна.',
     'registered.source': 'Сайт, с которого вы пришли',
     'registered.back': 'Вернуться в «{name}»',
     'registered.redirect': 'Автоматический возврат через {n} сек.',
+    'registered.toProfile': 'Вернуться в профиль',
+    'registered.editProfile': 'Редактировать профиль',
   },
 
   en: {
-    'hero.title': 'Welcome to Passport',
+    'hero.title': 'Welcome to Authly',
     'hero.subtitle': 'Access every service securely and quickly with a single digital profile.',
     'feature.secure.title': 'Secure',
     'feature.secure.text': 'Your data is stored encrypted.',
@@ -191,7 +195,7 @@ export const TRANSLATIONS = {
     'feature.fast.text': 'Sign up once and access every service.',
     'feature.reliable.title': 'Reliable',
     'feature.reliable.text': 'Secure verification via Telegram bot or email.',
-    'footer.rights': '© 2026 Passport. All rights reserved.',
+    'footer.rights': '© 2026 Authly. All rights reserved.',
     'lang.label': 'Language',
 
     'common.or': 'or',
@@ -263,12 +267,14 @@ export const TRANSLATIONS = {
     'profile.save': 'Save',
     'profile.logout': 'Log out',
     'saved.title': 'Your details have been saved!',
-    'saved.text': 'Your profile has been updated. The new details will appear across all Raqamli Nazorat projects.',
+    'saved.text': 'Your profile has been updated. The new details will appear across all connected projects and services.',
     'registered.title': 'You are registered!',
     'registered.text':
-      'Your Passport profile is ready. You can now sign in to every Raqamli Nazorat project with this single profile — no need to register again.',
+      'Your Authly profile is ready. You can now sign in to all partner projects and services with this single profile — no need to register again.',
     'registered.source': 'The site you came from',
     'registered.back': 'Back to {name}',
     'registered.redirect': 'You will be redirected automatically in {n} seconds',
+    'registered.toProfile': 'Back to profile',
+    'registered.editProfile': 'Edit profile',
   },
 }

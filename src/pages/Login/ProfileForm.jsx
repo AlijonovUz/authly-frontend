@@ -179,6 +179,7 @@ function ProfileForm() {
     setSaveError(null)
     try {
       await saveProfile({ ...form, photo: photo?.file ?? null })
+      setExisting(true)
       setRegistered(true)
     } catch (err) {
       if (err?.status === 401) {
@@ -203,7 +204,15 @@ function ProfileForm() {
     window.location.hash = '#/'
   }
 
-  if (registered) return <RegisteredView updated={existing} />
+  if (registered) {
+    return (
+      <RegisteredView
+        updated={existing}
+        onBack={() => setRegistered(false)}
+        onLogout={handleLogout}
+      />
+    )
+  }
 
   return (
     <form className="form form--profile" onSubmit={handleSubmit} noValidate>

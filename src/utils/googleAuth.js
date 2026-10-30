@@ -5,7 +5,7 @@
 // shaffof qilib joylanadi (GIS oynani faqat o'z tugmasidan ochishga ruxsat beradi).
 //
 // Google Cloud Console → OAuth client → "Authorized JavaScript origins" ga qo'shilishi kerak:
-//   https://passport.raqamlinazorat.uz   va   http://localhost:5173
+//   https://authly.uz   va   http://localhost:5173
 
 const CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||

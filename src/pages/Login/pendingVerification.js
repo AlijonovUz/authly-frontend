@@ -6,7 +6,7 @@
 //       'phone' — register/phone/verify/
 // Parol sessionStorage'ga yozilmaydi — faqat xotirada turadi.
 
-const KEY = 'passport.pendingVerification'
+const KEY = 'authly.pendingVerification'
 let password = null
 let fallback = null // sessionStorage yopiq bo'lsa
 

@@ -35,69 +35,7 @@ export async function googleLogin(idToken) {
   return data
 }
 
-// Parol bilan kirish. Telefon/email tasdiqlanmagan bo'lsa backend OTP yuborib 403 qaytaradi —
-// bunday holatda xato `verificationRequired: true` bilan otiladi.
-export async function login(phoneOrEmail, password) {
-  try {
-    const data = await request(`${AUTH}/login/`, {
-      method: 'POST',
-      body: { phone_or_email: phoneOrEmail, password },
-      auth: false,
-    })
-    if (!saveTokens(data)) throw new Error('Token qaytmadi')
-    return data
-  } catch (err) {
-    if (err.status === 403 && err.code === 'verification_required') err.verificationRequired = true
-    throw err
-  }
-}
-
-// Kirishda yuborilgan OTP bilan telefon/emailni tasdiqlaydi (token bermaydi)
-export function verifyIdentifier(phoneOrEmail, code) {
-  return request(`${AUTH}/verify/`, {
-    method: 'POST',
-    body: { phone_or_email: phoneOrEmail, code },
-    auth: false,
-  })
-}
-
-// Telefon bilan ro'yxatdan o'tish: OTP Telegram bot orqali keladi.
-// Raqam botga bog'lanmagan bo'lsa javobda bot_url bo'ladi.
-export function registerPhone({ firstName, lastName, phone, password }) {
-  return request(`${AUTH}/register/phone/`, {
-    method: 'POST',
-    body: { first_name: firstName, last_name: lastName, phone_number: phone, password },
-    auth: false,
-  })
-}
-
-// Telefon OTP'ni tasdiqlab foydalanuvchini yaratadi. Token qaytsa — saqlanadi (true)
-export async function verifyRegisterPhone(phone, code) {
-  const data = await request(`${AUTH}/register/phone/verify/`, {
-    method: 'POST',
-    body: { phone_number: phone, code },
-    auth: false,
-  })
-  return saveTokens(data)
-}
-
-export function registerEmail({ firstName, lastName, email, password }) {
-  return request(`${AUTH}/register/email/`, {
-    method: 'POST',
-    body: { first_name: firstName, last_name: lastName, email, password },
-    auth: false,
-  })
-}
-
-export async function verifyRegisterEmail(email, code) {
-  const data = await request(`${AUTH}/register/email/verify/`, {
-    method: 'POST',
-    body: { email, code },
-    auth: false,
-  })
-  return saveTokens(data)
-}
-
+// Tizimdan chiqish (refresh tokenni blacklistga kiritish va xotirani tozalash)
 export async function logout() {
   const refresh = tokens.refresh
   try {
@@ -107,13 +45,14 @@ export async function logout() {
   }
 }
 
+// Joriy foydalanuvchi profilini olish
 export const getMe = () => request('/api/v1/accounts/me/')
 
 // Profilda viloyat, tuman va tug'ilgan sana bo'lsa — to'ldirilgan hisoblanadi
 export const isProfileComplete = (me) =>
   Boolean(me?.first_name && me?.last_name && me?.region_info && me?.district_info && me?.birth_date)
 
-// profile: { firstName, lastName, region (uuid), district (uuid), birthDate: 'KK.OO.YYYY', photo: File|null }
+// Profil ma'lumotlarini yangilash
 export function saveProfile({ firstName, lastName, region, district, birthDate, photo }) {
   const [d, m, y] = birthDate.split('.')
   const fields = {
@@ -133,3 +72,36 @@ export function saveProfile({ firstName, lastName, region, district, birthDate, 
   }
   return request('/api/v1/accounts/me/', { method: 'PATCH', body })
 }
+
+// Profilga telefon raqam bog'lash (Telegram botdan olingan kod bilan)
+export function linkPhone(code) {
+  return request('/api/v1/accounts/me/phone/link/', {
+    method: 'POST',
+    body: { code },
+  })
+}
+
+// Profilga Google akkauntini bog'lash
+export function linkGoogle(idToken) {
+  return request('/api/v1/accounts/me/google/link/', {
+    method: 'POST',
+    body: { id_token: idToken },
+  })
+}
+
+// Tokenni tekshirish
+export function verifyToken(token) {
+  return request(`${AUTH}/token/verify/`, {
+    method: 'POST',
+    body: { token },
+    auth: false,
+  })
+}
+
+// --- Eski / bekor qilingan endpointlar (eski formalar import xatosi bermasligi uchun stublar) ---
+export const login = () => Promise.reject(new Error('Parol orqali kirish backendda qo‘llab-quvvatlanmaydi'))
+export const verifyIdentifier = () => Promise.reject(new Error('Ushbu amal backendda mavjud emas'))
+export const registerPhone = () => Promise.reject(new Error('Ushbu amal backendda mavjud emas'))
+export const verifyRegisterPhone = () => Promise.reject(new Error('Ushbu amal backendda mavjud emas'))
+export const registerEmail = () => Promise.reject(new Error('Ushbu amal backendda mavjud emas'))
+export const verifyRegisterEmail = () => Promise.reject(new Error('Ushbu amal backendda mavjud emas'))

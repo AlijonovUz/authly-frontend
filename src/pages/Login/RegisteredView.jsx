@@ -1,6 +1,7 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { logout } from '../../api/auth.js'
 import { returnToSource } from '../../api/sso.js'
-import { ArrowRightIcon, CheckIcon } from '../../components/icons.jsx'
+import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, LogOutIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
 
@@ -16,12 +17,13 @@ const initials = (name) =>
     .join('')
 
 // Ro'yxatdan o'tish yakunlangach chiqadigan xabar. Kelgan sayt aniqlansa — unga qaytish tugmasi
-// va avtomatik yo'naltirish, aniqlanmasa — faqat xabar.
+// va avtomatik yo'naltirish, aniqlanmasa — profilga qaytish va chiqish tugmalari.
 // updated: mavjud profil tahrirlangan bo'lsa "ro'yxatdan o'tdingiz" o'rniga "saqlandi" deyiladi.
-function RegisteredView({ updated = false }) {
+function RegisteredView({ updated = false, onBack, onLogout }) {
   const { t, lang } = useI18n()
   const [source] = useState(getSourceSite)
   const [seconds, setSeconds] = useState(REDIRECT_SECONDS)
+  const [loggingOut, setLoggingOut] = useState(false)
   const leaving = useRef(false)
 
   // SSO bo'lsa avval backend'dan ruxsat olinadi. Xato bo'lsa sanoq to'xtaydi — tugma qoladi
@@ -39,6 +41,21 @@ function RegisteredView({ updated = false }) {
   const handleBackClick = (e) => {
     e.preventDefault()
     goBack()
+  }
+
+  const handleLogout = async () => {
+    if (onLogout) {
+      onLogout()
+      return
+    }
+    if (loggingOut) return
+    setLoggingOut(true)
+    try {
+      await logout()
+    } catch {
+      // Backend javob bermasa ham baribir chiqamiz
+    }
+    window.location.hash = '#/'
   }
 
   const onCountdownEnd = useEffectEvent(goBack)
@@ -65,7 +82,7 @@ function RegisteredView({ updated = false }) {
         <p className="form__subtitle registered__text">{t(updated ? 'saved.text' : 'registered.text')}</p>
       </div>
 
-      {source && (
+      {source ? (
         <>
           <div className="registered__source">
             <span className="registered__badge" aria-hidden="true">
@@ -92,7 +109,40 @@ function RegisteredView({ updated = false }) {
           {seconds != null && (
             <p className="registered__hint">{t('registered.redirect', { n: seconds })}</p>
           )}
+
+          {onBack && (
+            <button
+              type="button"
+              className="registered__link"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', margin: '0 auto', padding: 0 }}
+              onClick={onBack}
+            >
+              {t('registered.editProfile')}
+            </button>
+          )}
         </>
+      ) : (
+        <div className="profile__actions">
+          {onBack && (
+            <button
+              type="button"
+              className="btn-primary btn-primary--lg registered__back"
+              onClick={onBack}
+            >
+              <ArrowLeftIcon />
+              {t('registered.toProfile')}
+            </button>
+          )}
+          <button
+            type="button"
+            className="btn-logout"
+            onClick={handleLogout}
+            disabled={loggingOut}
+          >
+            <LogOutIcon width="18" height="18" />
+            {t('profile.logout')}
+          </button>
+        </div>
       )}
     </div>
   )

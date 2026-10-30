@@ -11,7 +11,7 @@ const SCROLL_SPEED = 30
 export function Brand() {
   return (
     <div className="brand">
-      <img className="brand__logo" src="/logo.svg" alt="Raqamli Nazorat" width="210" height="44" />
+      <img className="brand__logo" src="/logo.svg" alt="Authly" width="210" height="44" />
     </div>
   )
 }

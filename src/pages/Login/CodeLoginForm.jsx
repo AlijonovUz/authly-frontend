@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import {
   googleLogin,
-  login,
   telegramLogin,
-  verifyIdentifier,
-  verifyRegisterPhone,
 } from '../../api/auth.js'
 import { GoogleIcon } from '../../components/icons.jsx'
 import Toast from '../../components/Toast.jsx'
@@ -20,9 +17,9 @@ const LENGTH = 6
 const SUCCESS_DELAY = 700
 
 // Kod yuboradigan Telegram bot (.env: VITE_TELEGRAM_BOT, @ belgisisiz)
-const BOT = import.meta.env.VITE_TELEGRAM_BOT || 'raqamli_passport_bot'
+const BOT = import.meta.env.VITE_TELEGRAM_BOT || 'AuthlyApp'
 
-// Bot yuborgan havola orqali kelgan kod: https://passport.raqamlinazorat.uz/#/?code=123456
+// Bot yuborgan havola orqali kelgan kod: https://authly.uz/#/?code=123456
 // (oddiy "?code=123456" ham qabul qilinadi)
 const hashParams = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '')
 
@@ -42,24 +39,11 @@ function clearLinkCode() {
   history.replaceState(history.state, '', url)
 }
 
-// Kodni tekshiradi. true — foydalanuvchi kirdi (token bor), false — kod to'g'ri, lekin
-// backend token bermadi (endi Telegram bot kodi bilan kirish kerak).
+// Kodni tekshiradi (Telegram bot kodi orqali kirish)
 async function submitCode(code) {
-  const pending = getPending()
-  if (!pending) {
-    await telegramLogin(code)
-    return true
-  }
-  if (pending.kind === 'login') {
-    await verifyIdentifier(pending.identifier, code)
-    await login(pending.identifier, pending.password)
-    clearPending()
-    return true
-  }
-  // kind === 'phone'
-  const loggedIn = await verifyRegisterPhone(pending.identifier, code)
   clearPending()
-  return loggedIn
+  await telegramLogin(code)
+  return true
 }
 
 // status: idle | checking | success | error

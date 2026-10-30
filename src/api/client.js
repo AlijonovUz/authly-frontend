@@ -3,7 +3,7 @@
 // Masalan: VITE_API_URL=https://api.example.uz  (bo'sh bo'lsa — shu domenning o'zi, /api/...)
 // .env bo'lmasa yoki qiymat bo'sh bo'lsa (masalan, serverda build qilinganda) — production backend.
 // Bo'sh qolsa so'rov frontend domeniga ketib, nginx 405 qaytaradi.
-const BASE_URL = (import.meta.env.VITE_API_URL || 'https://backend-passport.raqamlinazorat.uz').replace(
+const BASE_URL = (import.meta.env.VITE_API_URL || 'https://api.authly.uz').replace(
   /\/+$/,
   '',
 )
@@ -11,8 +11,8 @@ const BASE_URL = (import.meta.env.VITE_API_URL || 'https://backend-passport.raqa
 // Backend fayl manzilini nisbiy ("/media/...") qaytarsa, API domenini qo'shamiz
 export const mediaUrl = (path) => (path?.startsWith('/') ? `${BASE_URL}${path}` : path)
 
-const ACCESS_KEY = 'passport.access'
-const REFRESH_KEY = 'passport.refresh'
+const ACCESS_KEY = 'authly.access'
+const REFRESH_KEY = 'authly.refresh'
 
 // localStorage yopiq bo'lishi mumkin (maxfiy oyna va h.k.) — xotirada ham saqlab turamiz
 const memory = {}
