@@ -2,9 +2,10 @@ import { useEffect, useState, useSyncExternalStore } from 'react'
 import { clearAllAuthCaches, getCachedUser, getMe, isProfileComplete, logout, saveProfile, setCachedUser } from '../../api/auth.js'
 import { getApiErrorMessage, mediaUrl } from '../../api/client.js'
 import { getCachedDistricts, getCachedRegions, getDistricts, getRegions } from '../../api/references.js'
-import { getPublicApplications } from '../../api/sso.js'
-import { LogOutIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
+import { getPublicApplications, returnToSource, usePublicApplications } from '../../api/sso.js'
+import { ArrowRightIcon, LogOutIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
+import { getSourceSite } from '../../utils/sourceSite.js'
 import { Field, FormAlert } from './FormParts.jsx'
 import DateField from './DateField.jsx'
 import LinkedAccounts from './LinkedAccounts.jsx'
@@ -128,7 +129,19 @@ function ProfileForm() {
   })
   // Boshqa viloyat tanlangan bo'lsa eski ro'yxat ko'rinmaydi
   const districts = loadedDistricts.region === form.region ? loadedDistricts.list : []
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
+  const [source] = useState(getSourceSite)
+  const apps = usePublicApplications()
+  const matchedApp = Array.isArray(apps)
+    ? apps.find((a) => {
+        try {
+          return a.url && new URL(a.url).hostname === source?.host
+        } catch {
+          return false
+        }
+      })
+    : null
+  const sourceName = matchedApp?.name ?? source?.service?.title?.[lang] ?? source?.host ?? ''
 
   // Oldingi surat uchun yaratilgan vaqtinchalik manzilni bo'shatamiz
   useEffect(() => {
@@ -337,6 +350,18 @@ function ProfileForm() {
             setCachedUser(updatedUser)
           }}
         />
+      )}
+
+      {source && (
+        <button
+          type="button"
+          className="btn-primary btn-primary--lg registered__back"
+          onClick={() => returnToSource(source)}
+          style={{ width: '100%', marginBottom: '12px' }}
+        >
+          {t('registered.back', { name: sourceName })}
+          <ArrowRightIcon />
+        </button>
       )}
 
       <div className="profile__actions">

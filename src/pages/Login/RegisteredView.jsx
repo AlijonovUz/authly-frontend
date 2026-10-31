@@ -1,6 +1,6 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { logout } from '../../api/auth.js'
-import { returnToSource } from '../../api/sso.js'
+import { getCachedApplications, returnToSource } from '../../api/sso.js'
 import { ArrowLeftIcon, ArrowRightIcon, CheckIcon, LogOutIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
@@ -69,7 +69,17 @@ function RegisteredView({ updated = false, onBack, onLogout }) {
     return () => clearTimeout(timer)
   }, [source, seconds])
 
-  const name = source?.service?.title?.[lang] ?? source?.host ?? ''
+  const apps = getCachedApplications() || []
+  const matchedApp = Array.isArray(apps)
+    ? apps.find((a) => {
+        try {
+          return a.url && new URL(a.url).hostname === source?.host
+        } catch {
+          return false
+        }
+      })
+    : null
+  const name = matchedApp?.name ?? source?.service?.title?.[lang] ?? source?.host ?? ''
 
   return (
     <div className="form registered">

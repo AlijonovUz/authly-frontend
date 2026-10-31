@@ -9,6 +9,7 @@ import LanguageSelect from './LanguageSelect.jsx'
 // import PasswordLoginForm from './PasswordLoginForm.jsx'
 // import PhoneLoginForm from './PhoneLoginForm.jsx'
 import ProfileForm from './ProfileForm.jsx'
+import RegisteredView from './RegisteredView.jsx'
 import { continueAfterLogin } from './session.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
 import { useI18n } from '../../i18n/context.js'
@@ -36,13 +37,13 @@ function LoginPage() {
   // Token bor — login formasi o'rniga profil/bog'lash; token yo'q — faqat login.
   // Boshqa saytdan (SSO) kelgan bo'lsa, profil to'liq bo'lganda o'sha saytga qaytariladi.
   const loggedIn = isLoggedIn()
+  const source = getSourceSite()
   const redirecting = loggedIn ? route === 'code' : route !== 'code'
   useEffect(() => {
     if (!redirecting) return
     if (!loggedIn) window.location.hash = '#/'
-    else if (getSourceSite()) continueAfterLogin()
-    else window.location.hash = '#/profile'
-  }, [redirecting, loggedIn])
+    else if (!source) window.location.hash = '#/profile'
+  }, [redirecting, loggedIn, source])
 
   const forms = {
     code: <CodeLoginForm onVerified={continueAfterLogin} />,
@@ -67,7 +68,18 @@ function LoginPage() {
           <LanguageSelect />
         </header>
 
-        {redirecting ? null : forms[route]}
+        {redirecting ? (
+          loggedIn && source ? (
+            <RegisteredView
+              updated={true}
+              onBack={() => {
+                window.location.hash = '#/profile'
+              }}
+            />
+          ) : null
+        ) : (
+          forms[route]
+        )}
 
         <p className="panel__footer">{t('footer.rights')}</p>
       </section>
