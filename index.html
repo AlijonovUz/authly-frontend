@@ -11,6 +11,59 @@
       rel="stylesheet"
     />
     <title>Authly</title>
+    <script>
+      (function() {
+        try {
+          var token = localStorage.getItem('authly.access');
+          if (!token) return;
+          var search = window.location.search;
+          if (!search) return;
+          var params = new URLSearchParams(search);
+          var clientId = params.get('client_id');
+          var redirectUri = params.get('redirect_uri');
+          if (!clientId || !redirectUri) return;
+          var userRaw = localStorage.getItem('authly.user');
+          if (userRaw) {
+            var u = JSON.parse(userRaw);
+            if (!u.first_name || !u.last_name || !u.region_info || !u.district_info || !u.birth_date) {
+              return;
+            }
+          }
+          var scope = params.get('scope') || 'read';
+          var state = params.get('state');
+          fetch('https://api.authly.uz/api/v1/sso/authorize/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+              client_id: clientId,
+              redirect_uri: redirectUri,
+              scope: scope
+            })
+          })
+          .then(function(res) {
+            if (!res.ok) throw new Error();
+            return res.json();
+          })
+          .then(function(resData) {
+            var data = resData && resData.data ? resData.data : resData;
+            var target = data.redirect_url || data.redirect_to || data.url || data.location;
+            if (!target && data.code) {
+              var parsedUrl = new URL(redirectUri);
+              parsedUrl.searchParams.set('code', data.code);
+              if (state) parsedUrl.searchParams.set('state', state);
+              target = parsedUrl.href;
+            }
+            if (target) {
+              window.location.replace(target);
+            }
+          })
+          .catch(function() {});
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
