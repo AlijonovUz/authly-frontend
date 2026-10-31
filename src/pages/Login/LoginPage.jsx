@@ -71,7 +71,7 @@ function LoginPage() {
           loggedIn && source ? (
             ssoFailed ? (
               <RegisteredView
-                updated={true}
+                updated={false}
                 onBack={() => {
                   window.location.hash = '#/profile'
                 }}

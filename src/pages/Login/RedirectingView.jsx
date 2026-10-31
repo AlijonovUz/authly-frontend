@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import { getCachedApplications, returnToSource } from '../../api/sso.js'
-import { ArrowRightIcon } from '../../components/icons.jsx'
+import { getCachedApplications } from '../../api/sso.js'
 import { useI18n } from '../../i18n/context.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
 
@@ -25,11 +24,6 @@ function RedirectingView() {
       })
     : null
   const name = matchedApp?.name ?? source?.service?.title?.[lang] ?? source?.host ?? ''
-
-  const handleBackClick = (e) => {
-    e.preventDefault()
-    if (source) returnToSource(source).catch(() => {})
-  }
 
   return (
     <div className="form registered">
@@ -69,22 +63,9 @@ function RedirectingView() {
           <div className="registered__source-text">
             <p className="registered__label">{t('registered.source')}</p>
             <p className="registered__name">{name}</p>
-            <a className="registered__link" href={source.url} onClick={handleBackClick}>
-              {source.host}
-            </a>
+            {source.host && <span className="registered__link">{source.host}</span>}
           </div>
         </div>
-      )}
-
-      {source && (
-        <a
-          className="btn-primary btn-primary--lg registered__back"
-          href={source.url}
-          onClick={handleBackClick}
-        >
-          {t('registered.back', { name })}
-          <ArrowRightIcon />
-        </a>
       )}
     </div>
   )

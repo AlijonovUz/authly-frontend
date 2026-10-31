@@ -227,12 +227,16 @@ function ProfileForm() {
     setSaveError(null)
     try {
       const updated = await saveProfile({ ...form, photo: photo?.file ?? null })
-      setExisting(true)
       if (updated) {
         setCurrentUser(updated)
         setCachedUser(updated)
       }
       getPublicApplications().catch(() => {})
+      const source = getSourceSite()
+      if (source) {
+        await returnToSource(source)
+        return
+      }
       setRegistered(true)
     } catch (err) {
       if (err?.status === 401) {
