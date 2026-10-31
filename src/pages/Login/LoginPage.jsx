@@ -5,9 +5,6 @@ import LinkTelegramForm from './LinkTelegramForm.jsx'
 import { Brand, FeaturesHero, ServicesHero } from './Hero.jsx'
 import { usePublicApplications } from '../../api/sso.js'
 import LanguageSelect from './LanguageSelect.jsx'
-// Keyinchalik aktivlashtirish uchun zaxira komponentlar:
-// import PasswordLoginForm from './PasswordLoginForm.jsx'
-// import PhoneLoginForm from './PhoneLoginForm.jsx'
 import ProfileForm from './ProfileForm.jsx'
 import RegisteredView from './RegisteredView.jsx'
 import { continueAfterLogin } from './session.js'
@@ -15,8 +12,6 @@ import { getSourceSite } from '../../utils/sourceSite.js'
 import { useI18n } from '../../i18n/context.js'
 import './LoginPage.css'
 
-// Faol marshrutlar: 'code' (asosiy kirish), 'profile' (profil) va 'link-telegram' (Telegram hisobini ulash).
-// 'phone' va 'password' formalari keyinchalik kerak bo'lganda faollashtiriladi.
 const ROUTES = ['code', 'profile', 'link-telegram']
 const getRoute = () => {
   const route = window.location.hash.replace(/^#\/?/, '').split('?')[0]
@@ -25,6 +20,7 @@ const getRoute = () => {
 
 function LoginPage() {
   const [route, setRoute] = useState(getRoute)
+  const [ssoFailed, setSsoFailed] = useState(false)
   const { t } = useI18n()
   const apps = usePublicApplications()
 
@@ -34,15 +30,19 @@ function LoginPage() {
     return () => window.removeEventListener('hashchange', onHashChange)
   }, [])
 
-  // Token bor — login formasi o'rniga profil/bog'lash; token yo'q — faqat login.
-  // Boshqa saytdan (SSO) kelgan bo'lsa, profil to'liq bo'lganda o'sha saytga qaytariladi.
   const loggedIn = isLoggedIn()
   const source = getSourceSite()
   const redirecting = loggedIn ? route === 'code' : route !== 'code'
+
   useEffect(() => {
     if (!redirecting) return
-    if (!loggedIn) window.location.hash = '#/'
-    else if (!source) window.location.hash = '#/profile'
+    if (!loggedIn) {
+      window.location.hash = '#/'
+    } else if (!source) {
+      window.location.hash = '#/profile'
+    } else {
+      continueAfterLogin().catch(() => setSsoFailed(true))
+    }
   }, [redirecting, loggedIn, source])
 
   const forms = {
@@ -51,8 +51,6 @@ function LoginPage() {
     'link-telegram': (
       <LinkTelegramForm onLinked={() => (window.location.hash = '#/profile?linked=telegram')} />
     ),
-    // phone: <PhoneLoginForm />,
-    // password: <PasswordLoginForm onLoggedIn={continueAfterLogin} />,
   }
 
   const hasApps = Array.isArray(apps) && apps.length > 0
@@ -70,12 +68,31 @@ function LoginPage() {
 
         {redirecting ? (
           loggedIn && source ? (
-            <RegisteredView
-              updated={true}
-              onBack={() => {
-                window.location.hash = '#/profile'
-              }}
-            />
+            ssoFailed ? (
+              <RegisteredView
+                updated={true}
+                onBack={() => {
+                  window.location.hash = '#/profile'
+                }}
+              />
+            ) : (
+              <div
+                className="form"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '260px',
+                  gap: '16px',
+                  textAlign: 'center',
+                }}
+              >
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '15px' }}>
+                  {t('sso.redirecting')}
+                </p>
+              </div>
+            )
           ) : null
         ) : (
           forms[route]

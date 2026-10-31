@@ -1,22 +1,31 @@
-import { getMe, isProfileComplete } from '../../api/auth.js'
+import { getCachedUser, getMe, isProfileComplete } from '../../api/auth.js'
 import { getPublicApplications, returnToSource } from '../../api/sso.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
 
-// Kirish muvaffaqiyatli bo'lgach: profil to'liq va kelgan sayt ma'lum bo'lsa — o'sha saytga qaytamiz,
-// aks holda profilni to'ldirish sahifasiga o'tamiz.
 export async function continueAfterLogin() {
+  const source = getSourceSite()
+  const cachedUser = getCachedUser()
+
+  if (source && cachedUser && isProfileComplete(cachedUser)) {
+    await returnToSource(source)
+    return
+  }
+
   try {
     const [me] = await Promise.all([
       getMe(),
       getPublicApplications().catch(() => []),
     ])
-    const source = getSourceSite()
-    if (isProfileComplete(me) && source) {
+    if (source && isProfileComplete(me)) {
       await returnToSource(source)
       return
     }
-  } catch {
-    // Profilni ololmasak ham, to'ldirish sahifasida qaytadan urinib ko'riladi
+  } catch (err) {
+    if (err?.status === 401) {
+      window.location.hash = '#/'
+      return
+    }
+    throw err
   }
   window.location.hash = '#/profile'
 }
