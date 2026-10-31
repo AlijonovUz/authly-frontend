@@ -6,6 +6,7 @@ import { Brand, FeaturesHero, ServicesHero } from './Hero.jsx'
 import { usePublicApplications } from '../../api/sso.js'
 import LanguageSelect from './LanguageSelect.jsx'
 import ProfileForm from './ProfileForm.jsx'
+import RedirectingView from './RedirectingView.jsx'
 import RegisteredView from './RegisteredView.jsx'
 import { continueAfterLogin } from './session.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
@@ -76,22 +77,7 @@ function LoginPage() {
                 }}
               />
             ) : (
-              <div
-                className="form"
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '260px',
-                  gap: '16px',
-                  textAlign: 'center',
-                }}
-              >
-                <p style={{ color: 'var(--color-text-muted)', fontSize: '15px' }}>
-                  {t('sso.redirecting')}
-                </p>
-              </div>
+              <RedirectingView />
             )
           ) : null
         ) : (

@@ -86,6 +86,7 @@ export const TRANSLATIONS = {
     'profile.logout': 'Chiqish',
     'saved.title': 'Maʼlumotlaringiz saqlandi!',
     'sso.redirecting': 'Yoʻnaltirilmoqda...',
+    'sso.redirectingHint': '{name} ilovasiga xavfsiz yoʻnaltirilmoqda, iltimos kuting...',
     'saved.text': 'Profilingiz yangilandi. Barcha ulangan loyiha va xizmatlarda yangi maʼlumotlaringiz koʻrinadi.',
     'registered.title': 'Roʻyxatdan oʻtdingiz!',
     'registered.text':
@@ -198,6 +199,7 @@ export const TRANSLATIONS = {
     'profile.logout': 'Выйти',
     'saved.title': 'Данные сохранены!',
     'sso.redirecting': 'Перенаправление...',
+    'sso.redirectingHint': 'Безопасное перенаправление в приложение {name}, пожалуйста подождите...',
     'saved.text': 'Ваш профиль обновлён. Новые данные будут видны во всех подключённых проектах и сервисах.',
     'registered.title': 'Вы зарегистрированы!',
     'registered.text':
@@ -309,6 +311,7 @@ export const TRANSLATIONS = {
     'profile.logout': 'Log out',
     'saved.title': 'Your details have been saved!',
     'sso.redirecting': 'Redirecting...',
+    'sso.redirectingHint': 'Safely redirecting to {name}, please wait...',
     'saved.text': 'Your profile has been updated. The new details will appear across all connected projects and services.',
     'registered.title': 'You are registered!',
     'registered.text':

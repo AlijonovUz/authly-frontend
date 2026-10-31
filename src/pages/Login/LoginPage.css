@@ -534,6 +534,24 @@
   color: var(--green-10);
 }
 
+.registered__icon--redirect {
+  background: #eef2ff;
+  color: var(--accent-default);
+}
+
+.redirecting-spinner {
+  animation: redirecting-spin 1s linear infinite;
+}
+
+@keyframes redirecting-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .registered .form__title {
   font-size: 40px;
   line-height: 48px;
