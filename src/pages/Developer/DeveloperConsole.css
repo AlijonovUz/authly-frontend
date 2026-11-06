@@ -698,30 +698,32 @@
 
 /* ---------- Code Integration Snippet Card ---------- */
 .dev-code-block {
-  background: #1e1e2e;
-  color: #cdd6f4;
+  background: #181824;
+  color: #d4d4d4;
   border-radius: 10px;
-  padding: 14px;
+  padding: 16px;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 12.5px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.6;
   overflow-x: auto;
   position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .dev-code-block__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  padding-bottom: 6px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
 }
 
 .dev-code-block__lang {
   color: #89b4fa;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 11px;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
@@ -729,6 +731,58 @@
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* ==========================================================================
+   VS CODE SYNTAX HIGHLIGHTING (2-rasm uslubidagi ranglar)
+   ========================================================================== */
+.tok-comment {
+  color: #6a9955;
+  font-style: italic;
+}
+
+.tok-keyword {
+  color: #c586c0;
+  font-weight: 600;
+}
+
+.tok-string {
+  color: #ce9178;
+}
+
+.tok-function {
+  color: #dcdcaa;
+}
+
+.tok-tag {
+  color: #569cd6;
+}
+
+.tok-attr {
+  color: #9cdcfe;
+}
+
+.tok-type {
+  color: #4ec9b0;
+}
+
+.tok-boolean {
+  color: #569cd6;
+}
+
+.tok-number {
+  color: #b5cea8;
+}
+
+.tok-operator {
+  color: #d4d4d4;
+}
+
+.tok-variable {
+  color: #9cdcfe;
 }
 
 /* ---------- Modals ---------- */
@@ -913,23 +967,6 @@
   to { transform: scale(1); opacity: 1; }
 }
 
-@media (max-width: 640px) {
-  .dev-header__top {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .dev-btn-primary {
-    width: 100%;
-  }
-  .dev-detail__sticky-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .dev-detail__top-actions {
-    justify-content: flex-start;
-  }
-}
-
 /* ==========================================================================
    INTEGRATION GUIDE CARD & TABS (.docx DOWNLOADS)
    ========================================================================== */
@@ -1016,10 +1053,98 @@
 }
 
 .dev-guide-tech-btn.is-active {
-  background: rgba(37, 99, 235, 0.08);
-  border-color: rgba(37, 99, 235, 0.25);
-  color: var(--accent-default, #2563eb);
   font-weight: 600;
+}
+
+/* Har bir texnologiyaning o'ziga xos rasmiy ranglari */
+.dev-guide-tech-btn--react.is-active {
+  background: rgba(0, 216, 255, 0.12);
+  color: #0088cc;
+  border-color: rgba(0, 216, 255, 0.5);
+}
+.dev-code-block__lang--react {
+  color: #00d8ff;
+}
+
+.dev-guide-tech-btn--nextjs.is-active {
+  background: #18181b;
+  color: #fafafa;
+  border-color: #3f3f46;
+}
+.dev-code-block__lang--nextjs {
+  color: #f4f4f5;
+}
+
+.dev-guide-tech-btn--vue.is-active {
+  background: rgba(66, 184, 131, 0.12);
+  color: #2e8b57;
+  border-color: rgba(66, 184, 131, 0.5);
+}
+.dev-code-block__lang--vue {
+  color: #42b883;
+}
+
+.dev-guide-tech-btn--button.is-active {
+  background: rgba(249, 115, 22, 0.12);
+  color: #ea580c;
+  border-color: rgba(249, 115, 22, 0.45);
+}
+.dev-code-block__lang--button {
+  color: #fb923c;
+}
+
+.dev-guide-tech-btn--env.is-active {
+  background: rgba(234, 179, 8, 0.12);
+  color: #b45309;
+  border-color: rgba(234, 179, 8, 0.45);
+}
+.dev-code-block__lang--env {
+  color: #facc15;
+}
+
+.dev-guide-tech-btn--python.is-active {
+  background: rgba(56, 189, 248, 0.12);
+  color: #0284c7;
+  border-color: rgba(56, 189, 248, 0.45);
+}
+.dev-code-block__lang--python {
+  color: #38bdf8;
+}
+
+.dev-guide-tech-btn--node.is-active {
+  background: rgba(34, 197, 94, 0.12);
+  color: #16a34a;
+  border-color: rgba(34, 197, 94, 0.45);
+}
+.dev-code-block__lang--node {
+  color: #4ade80;
+}
+
+.dev-guide-tech-btn--laravel.is-active {
+  background: rgba(239, 68, 68, 0.12);
+  color: #dc2626;
+  border-color: rgba(239, 68, 68, 0.45);
+}
+.dev-code-block__lang--laravel {
+  color: #f87171;
+}
+
+.dev-guide-tech-btn--curl.is-active {
+  background: rgba(251, 146, 60, 0.12);
+  color: #ea580c;
+  border-color: rgba(251, 146, 60, 0.45);
+}
+.dev-code-block__lang--curl {
+  color: #fb923c;
+}
+
+.dev-guide-tech-btn--webhook.is-active {
+  background: rgba(168, 85, 247, 0.12);
+  color: #7c3aed;
+  border-color: rgba(168, 85, 247, 0.45);
+}
+.dev-code-block__lang--webhook {
+  color: #c084fc;
 }
 
 .dev-guide-alert {
@@ -1058,3 +1183,476 @@
   border-radius: 4px;
 }
 
+/* ==========================================================================
+   WEBHOOK DELIVERY LOGS SECTION & TABLE
+   ========================================================================== */
+
+.dev-webhook-logs-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--border-subtle, #e5e7eb);
+}
+
+.dev-webhook-logs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dev-badge--count {
+  background: var(--bg-subtle, #f1f3f4);
+  color: var(--text-strong, #111827);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.dev-badge--danger {
+  background: #fde8e8;
+  color: #c81e1e;
+}
+
+.dev-logs-empty {
+  padding: 24px;
+  background: var(--bg-subtle, #f9fafb);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.dev-logs-table-wrapper {
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle, #e5e7eb);
+  border-radius: 10px;
+  background: var(--bg-surface, #ffffff);
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dev-logs-table-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.dev-logs-table-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dev-logs-table-wrapper::-webkit-scrollbar-thumb {
+  background: var(--border-sub);
+  border-radius: 4px;
+}
+
+.dev-logs-table-wrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}
+
+.dev-logs-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.dev-logs-loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+  background: var(--bg-subtle, #f8f9fa);
+  border-top: 1px solid var(--border-subtle, #e5e7eb);
+}
+
+.dev-logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.dev-logs-table th {
+  padding: 10px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-muted, #6b7280);
+  background: var(--bg-subtle, #f8f9fa);
+  border-bottom: 1px solid var(--border-subtle, #e5e7eb);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.dev-logs-table td {
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--border-subtle, #f1f3f4);
+  vertical-align: middle;
+}
+
+.dev-logs-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.dev-logs-row:hover {
+  background-color: rgba(37, 99, 235, 0.04);
+}
+
+.dev-log-event code {
+  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-size: 12px;
+  color: #1e40af;
+  background: #eff6ff;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.dev-log-date {
+  color: var(--text-muted, #6b7280);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Modal ichidagi Log tafsilotlari */
+.dev-log-meta-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 12px 14px;
+  background: var(--bg-subtle, #f8f9fa);
+  border-radius: 8px;
+}
+
+.dev-log-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.dev-log-meta-item code {
+  font-family: monospace;
+  font-weight: 600;
+  color: #1d4ed8;
+}
+
+@keyframes devSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dev-spin {
+  animation: devSpin 0.8s linear infinite;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN FOR DEVELOPER CONSOLE (ALL SCREEN SIZES)
+   ========================================================================== */
+
+/* 1. Planshetlar va kichik noutbuklar (<= 1024px) */
+@media (max-width: 1024px) {
+  .dev-table {
+    min-width: 620px;
+  }
+}
+
+/* 2. O'rta va kichik planshetlar (<= 768px) */
+@media (max-width: 768px) {
+  .dev-header__title {
+    font-size: 20px;
+  }
+  .dev-header__subtitle {
+    font-size: 13px;
+  }
+  .dev-table th,
+  .dev-table td {
+    padding: 11px 12px;
+  }
+  .dev-code-chip {
+    max-width: 160px;
+  }
+  .dev-card {
+    padding: 16px 18px;
+    border-radius: 12px;
+  }
+  .dev-guide-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .dev-guide-docs-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .dev-guide-docs-actions .dev-btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* 3. Mobil telefonlar va smartfonlar (<= 640px) */
+@media (max-width: 640px) {
+  .profile-tabs {
+    gap: 4px;
+    padding: 3px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+  }
+  .profile-tab {
+    padding: 8px 10px;
+    font-size: 13px;
+    gap: 6px;
+  }
+  .dev-header__top {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .dev-btn-primary {
+    width: 100%;
+    padding: 10px 16px;
+    justify-content: center;
+  }
+  .dev-detail__sticky-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-bottom: 10px;
+  }
+  .dev-detail__top-actions {
+    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .dev-detail__top-actions .dev-btn-secondary,
+  .dev-detail__top-actions .dev-btn-danger {
+    width: auto;
+    padding: 6px 10px;
+    font-size: 12px;
+    height: 32px;
+  }
+  .dev-table {
+    min-width: 580px;
+  }
+  .dev-table th,
+  .dev-table td {
+    padding: 10px 10px;
+    font-size: 12.5px;
+  }
+  .dev-card {
+    padding: 14px 14px;
+    gap: 14px;
+    border-radius: 12px;
+  }
+  .dev-card__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .dev-card__title {
+    font-size: 15px;
+    white-space: normal;
+  }
+  .dev-credential-card {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .dev-credential-code {
+    font-size: 12px;
+  }
+  .dev-credential-actions {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .dev-guide-platform-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    padding: 3px;
+  }
+  .dev-guide-platform-tab {
+    justify-content: center;
+    padding: 7px 6px;
+    font-size: 12.5px;
+  }
+  .dev-guide-tech-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    gap: 5px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .dev-guide-tech-tabs::-webkit-scrollbar {
+    display: none;
+  }
+  .dev-guide-tech-btn {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  .dev-code-block {
+    padding: 12px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+  .dev-code-block pre {
+    font-size: 11.5px;
+  }
+  .dev-modal-overlay {
+    padding: 8px;
+  }
+  .dev-modal {
+    max-height: 94vh;
+    max-height: 94dvh;
+    border-radius: 14px;
+  }
+  .dev-modal__header {
+    padding: 14px 16px;
+  }
+  .dev-modal__body {
+    padding: 16px;
+    gap: 12px;
+  }
+  .dev-modal__footer {
+    padding: 12px 16px;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+  .dev-modal__footer .dev-btn-secondary,
+  .dev-modal__footer .dev-btn-primary,
+  .dev-modal__footer .dev-btn-danger {
+    width: 100%;
+    justify-content: center;
+  }
+  .dev-logs-table {
+    min-width: 440px;
+  }
+  .dev-logs-table th,
+  .dev-logs-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+  .dev-log-meta-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 12px;
+  }
+}
+
+/* 4. Kichik mobil telefonlar (<= 480px) */
+@media (max-width: 480px) {
+  .profile-tabs {
+    padding: 2px;
+  }
+  .profile-tab {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+  .dev-header__title {
+    font-size: 18px;
+  }
+  .dev-code-chip {
+    max-width: 120px;
+  }
+  .dev-credential-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .dev-credential-actions .dev-btn-secondary,
+  .dev-credential-actions .dev-btn-danger,
+  .dev-credential-actions .dev-btn-ghost {
+    width: auto;
+    padding: 6px 10px;
+    font-size: 12px;
+    height: 32px;
+  }
+  .dev-credential-inline {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .dev-credential-inline .dev-credential-actions {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+  }
+  .dev-guide-docs-actions {
+    grid-template-columns: 1fr;
+  }
+  .dev-guide-alert {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+}
+
+/* 5. O'ta kichik ekranlar (<= 360px: masalan Galaxy Fold, iPhone SE 1st) */
+@media (max-width: 360px) {
+  .profile-tab {
+    padding: 6px 4px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .dev-credential-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+
+/* Action tugmalari va sarlavha responsive moslashuvi (tiqilib qolishni oldini olish) */
+.dev-back-btn-text-mobile {
+  display: none;
+}
+
+@media (max-width: 540px) {
+  .dev-back-btn-text-desktop {
+    display: none;
+  }
+  .dev-back-btn-text-mobile {
+    display: inline;
+  }
+  .dev-btn-responsive-icon .dev-btn-text-desktop {
+    display: none;
+  }
+  .dev-btn-responsive-icon {
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    justify-content: center !important;
+  }
+  .dev-action-edit-btn {
+    padding: 0 8px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+  }
+  .dev-detail__sticky-header {
+    gap: 6px !important;
+  }
+  .dev-detail__top-actions {
+    gap: 4px !important;
+  }
+}

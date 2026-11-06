@@ -6,6 +6,7 @@ import {
   deleteDeveloperWebhook,
   getDeveloperApplication,
   getDeveloperApplications,
+  getDeveloperWebhookLogs,
   resetDeveloperApplicationSecret,
   resetDeveloperWebhookSecret,
   updateDeveloperApplication,
@@ -32,9 +33,27 @@ import {
 import Toast from '../../components/Toast.jsx'
 import { useI18n } from '../../i18n/context.js'
 import IntegrationGuideCard from './IntegrationGuideCard.jsx'
+import { highlightJson } from './codeHighlighter.js'
 import './DeveloperConsole.css'
 
 // Sana formati: DD.MM.YYYY (masalan: 13.11.2026)
+// Sana va vaqt formatlash: DD.MM.YYYY HH:mm
+function formatDateTime(iso) {
+  if (!iso) return ''
+  try {
+    const d = new Date(iso)
+    if (isNaN(d.getTime())) return iso
+    const day = String(d.getDate()).padStart(2, '0')
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const year = d.getFullYear()
+    const hours = String(d.getHours()).padStart(2, '0')
+    const mins = String(d.getMinutes()).padStart(2, '0')
+    return `${day}.${month}.${year} ${hours}:${mins}`
+  } catch {
+    return iso
+  }
+}
+
 function formatDate(iso) {
   if (!iso) return ''
   try {
@@ -62,6 +81,17 @@ export default function DeveloperConsole({ onBackToProfile }) {
   const [selectedApp, setSelectedApp] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [showSecret, setShowSecret] = useState(false)
+  const [showWebhookSecret, setShowWebhookSecret] = useState(false)
+
+  // Webhook Delivery Logs state & Scroll Pagination
+  const [webhookLogs, setWebhookLogs] = useState([])
+  const [webhookLogsLoading, setWebhookLogsLoading] = useState(false)
+  const [webhookLogsLoadingMore, setWebhookLogsLoadingMore] = useState(false)
+  const [webhookLogsPage, setWebhookLogsPage] = useState(1)
+  const [webhookLogsHasNext, setWebhookLogsHasNext] = useState(false)
+  const [webhookLogsTotalCount, setWebhookLogsTotalCount] = useState(0)
+  const [selectedLog, setSelectedLog] = useState(null)
+  const fetchingLogsRef = useRef(false)
 
   // Modals state
   const [modal, setModal] = useState(null)
@@ -134,14 +164,86 @@ export default function DeveloperConsole({ onBackToProfile }) {
     }
   }
 
+  // Webhook yetkazilish loglarini yuklash (Scroll Pagination - faqat 1 ta so'rov)
+  const fetchWebhookLogs = async (webhookId, pageNum = 1) => {
+    if (!webhookId || fetchingLogsRef.current) return
+    fetchingLogsRef.current = true
+    if (pageNum === 1) {
+      setWebhookLogsLoading(true)
+    } else {
+      setWebhookLogsLoadingMore(true)
+    }
+
+    try {
+      const res = await getDeveloperWebhookLogs(webhookId, { page: pageNum })
+      const dataObj = res?.data || res || {}
+      const list = Array.isArray(dataObj)
+        ? dataObj
+        : Array.isArray(dataObj.results)
+          ? dataObj.results
+          : []
+      const hasNext = Boolean(dataObj.next)
+      const count = typeof dataObj.count === 'number' ? dataObj.count : list.length
+      setWebhookLogsTotalCount(count)
+      setWebhookLogsHasNext(hasNext)
+      setWebhookLogsPage(pageNum)
+      if (pageNum === 1) {
+        setWebhookLogs(list)
+      } else {
+        setWebhookLogs((prev) => {
+          const ids = new Set(prev.map((item) => item.id))
+          const newItems = list.filter((item) => !ids.has(item.id))
+          return [...prev, ...newItems]
+        })
+      }
+    } catch {
+      if (pageNum === 1) {
+        setWebhookLogs([])
+    setWebhookLogsTotalCount(0)
+    fetchingLogsRef.current = false
+        setWebhookLogsTotalCount(0)
+      }
+    } finally {
+      fetchingLogsRef.current = false
+      setWebhookLogsLoading(false)
+      setWebhookLogsLoadingMore(false)
+    }
+  }
+
+  // Loglar jadvali pastiga scroll bo'lganda keyingi sahifani chaqirish (Infinite Scroll Pagination)
+  const handleLogsScroll = (e) => {
+    const el = e.currentTarget
+    if (
+      !el ||
+      !webhookLogsHasNext ||
+      webhookLogsLoading ||
+      webhookLogsLoadingMore ||
+      fetchingLogsRef.current ||
+      !selectedApp?.webhook_info?.id
+    ) {
+      return
+    }
+
+    // Pastki chegaraga 40px qolganda keyingi sahifani yuklaymiz
+    const scrollBottom = el.scrollHeight - el.scrollTop - el.clientHeight
+    if (scrollBottom <= 40) {
+      fetchWebhookLogs(selectedApp.webhook_info.id, webhookLogsPage + 1)
+    }
+  }
+
   // Open detail view
   const openDetail = async (appId) => {
     setView('detail')
     setDetailLoading(true)
     setShowSecret(false)
+    setShowWebhookSecret(false)
+    setWebhookLogs([])
     try {
       const data = await getDeveloperApplication(appId)
       setSelectedApp(data)
+      if (data?.webhook_info?.id) {
+        fetchWebhookLogs(data.webhook_info.id, 1)
+      }
     } catch (err) {
       setToast({
         type: 'error',
@@ -335,6 +437,7 @@ export default function DeveloperConsole({ onBackToProfile }) {
       const wh = await createDeveloperWebhook({ application: appId, url })
       if (selectedApp?.id === appId) {
         setSelectedApp((prev) => ({ ...prev, webhook_info: wh }))
+        if (wh?.id) fetchWebhookLogs(wh.id, 1)
       }
       setToast({
         type: 'success',
@@ -384,6 +487,7 @@ export default function DeveloperConsole({ onBackToProfile }) {
     try {
       await deleteDeveloperWebhook(webhookId)
       setSelectedApp((prev) => ({ ...prev, webhook_info: null }))
+      setWebhookLogs([])
       setToast({
         type: 'success',
         title: t('dev.deleteWebhook'),
@@ -621,33 +725,37 @@ export default function DeveloperConsole({ onBackToProfile }) {
               }}
             >
               <ArrowLeftIcon width="16" height="16" />
-              {t('dev.backToList')}
+              <span className="dev-back-btn-text-desktop">{t('dev.backToList')}</span>
+              <span className="dev-back-btn-text-mobile">{t('dev.back')}</span>
             </button>
             {selectedApp && (
               <div className="dev-detail__top-actions">
                 <button
                   type="button"
-                  className="dev-btn-secondary"
-                  onClick={() => handleDownloadJson(selectedApp)}
-                >
-                  <CodeIcon width="14" height="14" />
-                  JSON
-                </button>
-                <button
-                  type="button"
-                  className="dev-btn-secondary"
+                  className="dev-btn-secondary dev-btn-sm dev-action-edit-btn"
                   onClick={() => setModal({ type: 'edit', app: selectedApp })}
+                  title={t('dev.edit')}
                 >
-                  <EditIcon width="14" height="14" />
-                  {t('dev.edit')}
+                  <EditIcon width="13" height="13" />
+                  <span>{t('dev.edit')}</span>
                 </button>
                 <button
                   type="button"
-                  className="dev-btn-danger"
-                  onClick={() => setModal({ type: 'delete', app: selectedApp })}
+                  className="dev-btn-secondary dev-btn-sm dev-btn-responsive-icon"
+                  onClick={() => handleDownloadJson(selectedApp)}
+                  title="JSON"
                 >
-                  <TrashIcon width="14" height="14" />
-                  {t('dev.delete')}
+                  <CodeIcon width="13" height="13" />
+                  <span className="dev-btn-text-desktop">JSON</span>
+                </button>
+                <button
+                  type="button"
+                  className="dev-btn-danger dev-btn-sm dev-btn-responsive-icon"
+                  onClick={() => setModal({ type: 'delete', app: selectedApp })}
+                  title={t('dev.delete')}
+                >
+                  <TrashIcon width="13" height="13" />
+                  <span className="dev-btn-text-desktop">{t('dev.delete')}</span>
                 </button>
               </div>
             )}
@@ -826,34 +934,6 @@ export default function DeveloperConsole({ onBackToProfile }) {
                             {selectedApp.webhook_info.url}
                           </span>
                         </div>
-                        <div className="dev-credential-actions">
-                          <label
-                            className="dev-switch"
-                            title={
-                              selectedApp.webhook_info.is_active
-                                ? t('dev.active')
-                                : t('dev.inactive')
-                            }
-                          >
-                            <input
-                              type="checkbox"
-                              checked={Boolean(selectedApp.webhook_info.is_active)}
-                              onChange={() => handleToggleWebhook(selectedApp.webhook_info)}
-                            />
-                            <span className="dev-switch__slider" />
-                          </label>
-                          <span
-                            className={`dev-badge ${
-                              selectedApp.webhook_info.is_active
-                                ? 'dev-badge--active'
-                                : 'dev-badge--inactive'
-                            }`}
-                          >
-                            {selectedApp.webhook_info.is_active
-                              ? t('dev.active')
-                              : t('dev.inactive')}
-                          </span>
-                        </div>
                       </div>
                     </div>
 
@@ -863,10 +943,28 @@ export default function DeveloperConsole({ onBackToProfile }) {
                       <div className="dev-credential-card">
                         <div className="dev-credential-display">
                           <span className="dev-credential-code">
-                            {selectedApp.webhook_info.secret || '••••••••••••••••••••'}
+                            {selectedApp.webhook_info.secret
+                              ? showWebhookSecret
+                                ? selectedApp.webhook_info.secret
+                                : '••••••••••••••••••••••••••••••••••••••••••••••••'
+                              : '••••••••••••••••••••••••••••••••••••••••••••••••'}
                           </span>
                         </div>
                         <div className="dev-credential-actions">
+                          {selectedApp.webhook_info.secret && (
+                            <button
+                              type="button"
+                              className="dev-btn-ghost dev-btn-sm"
+                              onClick={() => setShowWebhookSecret((v) => !v)}
+                              title={showWebhookSecret ? t('dev.hide') : t('dev.show')}
+                            >
+                              {showWebhookSecret ? (
+                                <EyeOffIcon width="15" height="15" />
+                              ) : (
+                                <EyeIcon width="15" height="15" />
+                              )}
+                            </button>
+                          )}
                           {selectedApp.webhook_info.secret && (
                             <button
                               type="button"
@@ -910,6 +1008,120 @@ export default function DeveloperConsole({ onBackToProfile }) {
                           </button>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Webhook Delivery Logs Section (i18n ulangan) */}
+                    <div className="dev-webhook-logs-section">
+                      <div className="dev-webhook-logs-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span className="dev-field-label" style={{ marginBottom: 0 }}>
+                            {t('dev.deliveryLogs')}
+                          </span>
+                          {(webhookLogsTotalCount > 0 || webhookLogs.length > 0) && (
+                            <span className="dev-badge dev-badge--count">
+                              {webhookLogsTotalCount || webhookLogs.length}
+                            </span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="dev-btn-ghost dev-btn-sm"
+                          onClick={() => fetchWebhookLogs(selectedApp.webhook_info.id, 1)}
+                          disabled={webhookLogsLoading}
+                          title={t('dev.refresh')}
+                        >
+                          <RefreshCwIcon
+                            width="13"
+                            height="13"
+                            className={webhookLogsLoading ? 'dev-spin' : ''}
+                          />
+                          <span>{t('dev.refresh')}</span>
+                        </button>
+                      </div>
+
+                      {webhookLogsLoading && webhookLogs.length === 0 ? (
+                        <div className="dev-logs-empty">
+                          <p className="dev-hint">{t('dev.logsLoading')}</p>
+                        </div>
+                      ) : webhookLogs.length === 0 ? (
+                        <div className="dev-logs-empty">
+                          <p className="dev-hint">
+                            {t('dev.logsEmpty')}
+                          </p>
+                        </div>
+                      ) : (
+                        <div
+                          className="dev-logs-table-wrapper"
+                          onScroll={handleLogsScroll}
+                          style={{ maxHeight: '350px', overflowY: 'auto' }}
+                        >
+                          <table className="dev-logs-table">
+                            <thead>
+                              <tr>
+                                <th>{t('dev.status')}</th>
+                                <th>{t('dev.event')}</th>
+                                <th>{t('dev.dateTime')}</th>
+                                <th style={{ textAlign: 'right' }}>{t('dev.details')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {webhookLogs.map((log) => {
+                                const isSuccess =
+                                  log.status === 'success' ||
+                                  (log.status_code >= 200 && log.status_code < 300)
+                                return (
+                                  <tr
+                                    key={log.id}
+                                    className="dev-logs-row"
+                                    onClick={() => setSelectedLog(log)}
+                                  >
+                                    <td>
+                                      <span
+                                        className={`dev-badge ${
+                                          isSuccess
+                                            ? 'dev-badge--active'
+                                            : 'dev-badge--danger'
+                                        }`}
+                                      >
+                                        {log.status_code || (isSuccess ? '200' : '500')}
+                                      </span>
+                                    </td>
+                                    <td className="dev-log-event">
+                                      <code>{log.event}</code>
+                                    </td>
+                                    <td className="dev-log-date">
+                                      {formatDateTime(log.created_at)}
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                      <button
+                                        type="button"
+                                        className="dev-btn-secondary dev-btn-sm"
+                                        onClick={(e) => {
+                                          e.stopPropagation()
+                                          setSelectedLog(log)
+                                        }}
+                                      >
+                                        {t('dev.details')}
+                                      </button>
+                                    </td>
+                                  </tr>
+                                )
+                              })}
+                            </tbody>
+                          </table>
+
+                          {webhookLogsLoadingMore && (
+                            <div className="dev-logs-loading-more">
+                              <RefreshCwIcon
+                                width="13"
+                                height="13"
+                                className="dev-spin"
+                              />
+                              <span>{t('dev.loading')}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (
@@ -1363,6 +1575,124 @@ export default function DeveloperConsole({ onBackToProfile }) {
                 onClick={() => handleResetWebhookSecret(modal.webhookId)}
               >
                 {submitting ? '...' : t('dev.resetWebhookSecret')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* MODAL: Webhook Log Detail (i18n ulangan) */}
+      {selectedLog && (
+        <div className="dev-modal-overlay" onClick={() => setSelectedLog(null)}>
+          <div
+            className="dev-modal dev-modal--wide"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: '640px' }}
+          >
+            <div className="dev-modal__header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <WebhookIcon width="18" height="18" />
+                <h3 className="dev-modal__title">
+                  {t('dev.logModalTitle')}
+                </h3>
+              </div>
+              <button
+                type="button"
+                className="dev-modal__close"
+                onClick={() => setSelectedLog(null)}
+              >
+                <XIcon width="16" height="16" />
+              </button>
+            </div>
+
+            <div className="dev-modal__body">
+              {/* Meta bar */}
+              <div className="dev-log-meta-bar">
+                <div className="dev-log-meta-item">
+                  <span className="dev-field-label">{t('dev.event')}:</span>
+                  <code>{selectedLog.event}</code>
+                </div>
+                <div className="dev-log-meta-item">
+                  <span className="dev-field-label">{t('dev.status')}:</span>
+                  <span
+                    className={`dev-badge ${
+                      selectedLog.status === 'success' ||
+                      (selectedLog.status_code >= 200 && selectedLog.status_code < 300)
+                        ? 'dev-badge--active'
+                        : 'dev-badge--danger'
+                    }`}
+                  >
+                    HTTP {selectedLog.status_code} ({selectedLog.status})
+                  </span>
+                </div>
+                <div className="dev-log-meta-item">
+                  <span className="dev-field-label">{t('dev.dateTime')}:</span>
+                  <span>{formatDateTime(selectedLog.created_at)}</span>
+                </div>
+              </div>
+
+              {/* Error Alert if failed */}
+              {selectedLog.error_message && (
+                <div className="dev-guide-alert dev-guide-alert--warning" style={{ margin: 0 }}>
+                  <AlertTriangleIcon width="16" height="16" style={{ flexShrink: 0 }} />
+                  <div>
+                    <strong>{t('dev.error')}:</strong> {selectedLog.error_message}
+                  </div>
+                </div>
+              )}
+
+              {/* Request Payload */}
+              <div className="dev-field-row">
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <label className="dev-field-label">{t('dev.payload')}</label>
+                  <button
+                    type="button"
+                    className="dev-btn-ghost dev-btn-sm"
+                    onClick={() =>
+                      handleCopy(
+                        JSON.stringify(selectedLog.payload, null, 2),
+                        t('dev.payload'),
+                      )
+                    }
+                  >
+                    <CopyIcon width="13" height="13" />
+                    <span>{t('dev.copy')}</span>
+                  </button>
+                </div>
+                <div className="dev-code-block" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                  <pre
+                    dangerouslySetInnerHTML={{
+                      __html: highlightJson(selectedLog.payload) || '{}',
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Response Body */}
+              <div className="dev-field-row">
+                <label className="dev-field-label">{t('dev.responseBody')}</label>
+                <div className="dev-code-block" style={{ maxHeight: '160px', overflowY: 'auto' }}>
+                  <pre
+                    dangerouslySetInnerHTML={{
+                      __html: highlightJson(selectedLog.response_body) || '—',
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="dev-modal__footer">
+              <button
+                type="button"
+                className="dev-btn-secondary"
+                onClick={() => setSelectedLog(null)}
+              >
+                {t('dev.close')}
               </button>
             </div>
           </div>

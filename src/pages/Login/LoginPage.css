@@ -503,7 +503,7 @@
 }
 
 .form--profile {
-  gap: 24px;
+  gap: 18px;
 }
 
 .form--profile .form__heading {
@@ -878,7 +878,7 @@
 .profile__fields {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 10px;
 }
 
 .profile__row {
@@ -1713,8 +1713,7 @@
 .linked-accounts {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
+  gap: 10px;
 }
 
 .linked-accounts__header {
@@ -2060,8 +2059,8 @@
   }
   .form--profile {
     flex: 1;
-    gap: 16px;
-    margin-top: 48px;
+    gap: 12px;
+    margin-top: 6px;
   }
   .form--profile .form__heading {
     margin-bottom: 4px;
@@ -2105,10 +2104,10 @@
   }
 }
 
-@media (max-width: 340px) {
+@media (max-width: 540px) {
   .form__alt,
   .profile__row {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -2117,6 +2116,7 @@
   justify-content: flex-start;
   align-items: stretch;
   height: calc(100vh - 40px);
+  height: calc(100dvh - 40px);
   overflow: hidden;
   padding: 24px 48px 24px;
 }
@@ -2137,17 +2137,12 @@
   display: none;
 }
 
-@media (max-width: 600px) {
-  .login__panel--developer {
-    padding: 20px 16px;
-    height: 100vh;
-  }
-}
 /* ---------- Profile Panel & Internal Scroll ---------- */
 .login__panel--profile {
   justify-content: flex-start;
   align-items: center;
   height: calc(100vh - 40px);
+  height: calc(100dvh - 40px);
   overflow: hidden;
   padding: 24px 64px 24px;
 }
@@ -2200,9 +2195,123 @@
   background: var(--text-faint);
 }
 
-@media (max-width: 600px) {
-  .login__panel--profile {
-    padding: 20px 16px;
+/* Planshetlar (601px - 1024px) */
+@media (min-width: 601px) and (max-width: 1024px) {
+  .login__panel--developer {
+    padding: 24px 32px;
     height: 100vh;
+    height: 100dvh;
   }
+  .login__panel--profile {
+    padding: 24px 32px;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .profile-view {
+    max-width: 580px;
+  }
+}
+
+/* Mobil telefonlar (<= 600px) */
+@media (max-width: 600px) {
+  .login__panel--developer {
+    padding: 16px 14px;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .login__panel--profile {
+    padding: 16px 14px;
+    height: 100vh;
+    height: 100dvh;
+  }
+  .profile-view {
+    max-width: 100%;
+  }
+  .profile-scrollable {
+    padding-right: 2px;
+    gap: 18px;
+  }
+}
+
+/* Kichik mobil telefonlar (<= 420px) */
+@media (max-width: 420px) {
+  .login__panel--developer,
+  .login__panel--profile {
+    padding: 12px 10px;
+  }
+  .profile-scrollable {
+    gap: 14px;
+  }
+}
+
+/* Profil maydonlari va action tugmalarini ixchamlashtirish */
+.form--profile .profile__fields {
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.form--profile .profile__row {
+  gap: 10px;
+}
+
+.form--profile .field {
+  gap: 4px;
+}
+
+.form--profile .field__label {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.form--profile .field__control {
+  height: 42px;
+  padding: 0 12px;
+  border-radius: 10px;
+}
+
+.form--profile .field__input {
+  font-size: 14px;
+}
+
+.form--profile .field__select {
+  font-size: 14px;
+  padding: 0 36px 0 12px;
+}
+
+.form--profile .btn--submit {
+  height: 42px;
+  padding: 0 18px;
+  font-size: 14px;
+  border-radius: 10px;
+}
+
+/* Saqlash va Chiqish tugmalarining o'lchamlarini ixchamlashtirish */
+.profile__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.profile__actions .btn-primary--lg {
+  height: 42px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+}
+
+.profile__actions .btn-logout {
+  height: 42px !important;
+  padding: 0 16px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  gap: 6px !important;
+}
+
+.profile__actions .btn-logout svg {
+  width: 16px;
+  height: 16px;
 }

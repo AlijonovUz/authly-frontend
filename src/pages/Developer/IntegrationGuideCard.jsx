@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import {
   CodeIcon,
   CopyIcon,
@@ -8,13 +8,16 @@ import {
   ServerIcon,
   ShieldAlertIcon,
 } from '../../components/icons.jsx'
+import { useI18n } from '../../i18n/context.js'
+import { highlightCode } from './codeHighlighter.js'
 
 export default function IntegrationGuideCard({ app, onCopy, onToast }) {
+  const { t } = useI18n()
   const [platform, setPlatform] = useState('frontend') // 'frontend' | 'backend'
   const [tech, setTech] = useState('react') // frontend: 'react' | 'nextjs' | 'vue' | 'button' | 'env'
   // backend: 'python' | 'node' | 'laravel' | 'curl' | 'webhook'
 
-  const clientId = app?.client_id || 'SIZNING_CLIENT_ID'
+  const clientId = app?.client_id || 'CLIENT_ID'
   const rawUris = app?.redirect_uris ? app.redirect_uris.split(/\s+/).filter(Boolean) : []
   const firstUri = rawUris[0] || 'https://saytingiz.uz/auth/callback'
   const webhookSecret = app?.webhook_info?.secret || 'whsec_sample_secret'
@@ -34,8 +37,8 @@ export default function IntegrationGuideCard({ app, onCopy, onToast }) {
 
     onToast?.({
       type: 'success',
-      title: 'Hujjat yuklab olinmoqda',
-      message: `${fileName} fayli muvaffaqiyatli yuklab olindi.`,
+      title: t('dev.docDownloading'),
+      message: `${fileName} ${t('dev.docDownloaded')}`,
     })
   }
 
@@ -497,6 +500,15 @@ def verify_authly_signature(raw_body: bytes, signature_header: str, secret: str 
 
   const activeSnippet = platform === 'frontend' ? getFrontendSnippet() : getBackendSnippet()
 
+  const highlightedHtml = useMemo(() => {
+    let lang = 'javascript'
+    if (tech === 'python' || tech === 'webhook') lang = 'python'
+    else if (tech === 'laravel') lang = 'php'
+    else if (tech === 'curl') lang = 'shell'
+    else if (tech === 'env') lang = 'env'
+    return highlightCode(activeSnippet, lang)
+  }, [activeSnippet, tech])
+
   return (
     <div className="dev-card dev-guide-card">
       {/* Header with Title and Download Buttons */}
@@ -504,11 +516,9 @@ def verify_authly_signature(raw_body: bytes, signature_header: str, secret: str 
         <div className="dev-card__header-titles">
           <h3 className="dev-card__title">
             <CodeIcon width="17" height="17" />
-            Integratsiya qo'llanmasi (SDK & API)
+            {t('dev.guideTitle')}
           </h3>
-          <p className="dev-hint">
-            Loyihangizga Authly SSO avtorizatsiyasini oson ulash uchun tayyor kod namunalari va rasmiy qo'llanmalar.
-          </p>
+          <p className="dev-hint">{t('dev.guideSubtitle')}</p>
         </div>
 
         {/* Word (.docx) yuklab olish tugmalari */}
@@ -517,19 +527,19 @@ def verify_authly_signature(raw_body: bytes, signature_header: str, secret: str 
             type="button"
             className="dev-btn-secondary dev-btn-sm"
             onClick={() => handleDownloadDoc('frontend')}
-            title="Frontend integratsiya spetsifikatsiyasi (.docx)"
+            title="Frontend (.docx)"
           >
             <DownloadIcon width="14" height="14" />
-            <span>Frontend (.docx)</span>
+            <span>{t('dev.downloadFrontendDoc')}</span>
           </button>
           <button
             type="button"
             className="dev-btn-secondary dev-btn-sm"
             onClick={() => handleDownloadDoc('backend')}
-            title="Backend integratsiya spetsifikatsiyasi (.docx)"
+            title="Backend (.docx)"
           >
             <DownloadIcon width="14" height="14" />
-            <span>Backend (.docx)</span>
+            <span>{t('dev.downloadBackendDoc')}</span>
           </button>
         </div>
       </div>
@@ -538,131 +548,130 @@ def verify_authly_signature(raw_body: bytes, signature_header: str, secret: str 
       <div className="dev-guide-platform-tabs">
         <button
           type="button"
-          className={`dev-guide-platform-tab ${platform === 'frontend' ? 'is-active' : ''}`}
+          className={`dev-guide-platform-tab ${platform === 'frontend' ? 'is-active dev-guide-platform-tab--frontend' : ''}`}
           onClick={() => {
             setPlatform('frontend')
             setTech('react')
           }}
         >
           <GlobeIcon width="15" height="15" />
-          <span>Frontend (Mijoz tomoni)</span>
+          <span>{t('dev.frontendClient')}</span>
         </button>
         <button
           type="button"
-          className={`dev-guide-platform-tab ${platform === 'backend' ? 'is-active' : ''}`}
+          className={`dev-guide-platform-tab ${platform === 'backend' ? 'is-active dev-guide-platform-tab--backend' : ''}`}
           onClick={() => {
             setPlatform('backend')
             setTech('python')
           }}
         >
           <ServerIcon width="15" height="15" />
-          <span>Backend (Server tomoni)</span>
+          <span>{t('dev.backendServer')}</span>
         </button>
       </div>
 
-      {/* 2-darajali Tab: Texnologiya tanlash */}
+      {/* 2-darajali Tab: Texnologiya tanlash (Har biri o'ziga xos brend rangida) */}
       <div className="dev-guide-tech-tabs">
         {platform === 'frontend' ? (
           <>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'react' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--react ${tech === 'react' ? 'is-active' : ''}`}
               onClick={() => setTech('react')}
             >
               React.js
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'nextjs' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--nextjs ${tech === 'nextjs' ? 'is-active' : ''}`}
               onClick={() => setTech('nextjs')}
             >
               Next.js 14+
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'vue' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--vue ${tech === 'vue' ? 'is-active' : ''}`}
               onClick={() => setTech('vue')}
             >
               Vue 3
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'button' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--button ${tech === 'button' ? 'is-active' : ''}`}
               onClick={() => setTech('button')}
             >
-              Kirish Tugmasi (HTML/CSS)
+              {t('dev.loginButton')}
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'env' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--env ${tech === 'env' ? 'is-active' : ''}`}
               onClick={() => setTech('env')}
             >
-              .env Parametrlari
+              {t('dev.envParams')}
             </button>
           </>
         ) : (
           <>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'python' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--python ${tech === 'python' ? 'is-active' : ''}`}
               onClick={() => setTech('python')}
             >
               Python (Django)
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'node' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--node ${tech === 'node' ? 'is-active' : ''}`}
               onClick={() => setTech('node')}
             >
               Node.js (Express)
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'laravel' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--laravel ${tech === 'laravel' ? 'is-active' : ''}`}
               onClick={() => setTech('laravel')}
             >
               PHP (Laravel)
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'curl' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--curl ${tech === 'curl' ? 'is-active' : ''}`}
               onClick={() => setTech('curl')}
             >
               cURL & REST API
             </button>
             <button
               type="button"
-              className={`dev-guide-tech-btn ${tech === 'webhook' ? 'is-active' : ''}`}
+              className={`dev-guide-tech-btn dev-guide-tech-btn--webhook ${tech === 'webhook' ? 'is-active' : ''}`}
               onClick={() => setTech('webhook')}
             >
-              Webhook HMAC Imzo
+              Webhook HMAC
             </button>
           </>
         )}
       </div>
 
-      {/* Xavfsizlik eslatmasi (Stiker o'rniga toza SVG Ikonka) */}
+      {/* Xavfsizlik eslatmasi */}
       {platform === 'frontend' ? (
         <div className="dev-guide-alert dev-guide-alert--warning">
           <ShieldAlertIcon width="16" height="16" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <strong>MUHIM XAVFSIZLIK QOIDASI:</strong> Frontend kodida (React, Vue, Next.js) hech qachon{' '}
-            <code>Client Secret</code> kalitini ishlatmang va saqlamang! Token almashish faqat backend serveringizda bajarilishi shart.
+            <strong>{t('dev.securityRule')}</strong> {t('dev.securityRuleText')}
           </div>
         </div>
       ) : (
         <div className="dev-guide-alert dev-guide-alert--info">
           <InfoIcon width="16" height="16" style={{ flexShrink: 0, marginTop: '2px' }} />
           <div>
-            <strong>SERVER TALABI:</strong> <code>AUTHLY_CLIENT_SECRET</code> faqat server tomonida saqlanishi shart. Avtorizatsiya kodi (<code>code</code>) faqat 1 martalik va 120 soniya davomida amal qiladi.
+            <strong>{t('dev.serverReq')}</strong> {t('dev.serverReqText')}
           </div>
         </div>
       )}
 
-      {/* Kod Bloki */}
-      <div className="dev-code-block">
+      {/* Kod Bloki (VS Code Syntax Highlighting bilan) */}
+      <div className={`dev-code-block dev-code-block--${tech}`}>
         <div className="dev-code-block__header">
-          <span className="dev-code-block__lang">
+          <span className={`dev-code-block__lang dev-code-block__lang--${tech}`}>
             {platform === 'frontend'
               ? tech === 'react' || tech === 'nextjs'
                 ? 'TypeScript / React'
@@ -685,14 +694,14 @@ def verify_authly_signature(raw_body: bytes, signature_header: str, secret: str 
             type="button"
             className="dev-copy-btn"
             style={{ color: '#cdd6f4' }}
-            onClick={() => onCopy(activeSnippet, 'Kod namunasi')}
-            title="Kodni nusxalash"
+            onClick={() => onCopy(activeSnippet, t('dev.copy'))}
+            title={t('dev.copy')}
           >
             <CopyIcon width="14" height="14" />
-            <span style={{ fontSize: '11px', marginLeft: '4px' }}>Nusxa olish</span>
+            <span style={{ fontSize: '11px', marginLeft: '4px' }}>{t('dev.copy')}</span>
           </button>
         </div>
-        <pre>{activeSnippet}</pre>
+        <pre dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
       </div>
     </div>
   )
