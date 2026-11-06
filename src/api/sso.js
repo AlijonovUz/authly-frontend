@@ -34,6 +34,8 @@ export async function returnToSource(source) {
 
 const APPLICATIONS_KEY = 'authly.applications'
 let applicationsMemory = null
+let inFlightApplications = null
+let applicationsFetched = false
 
 export function getCachedApplications() {
   if (applicationsMemory) return applicationsMemory
@@ -60,27 +62,49 @@ export function setCachedApplications(apps) {
 
 export function clearCachedApplications() {
   setCachedApplications(null)
+  applicationsFetched = false
+  inFlightApplications = null
 }
 
-// Barcha ommaviy hamkor SSO ilovalari ro'yxati
-export async function getPublicApplications() {
-  try {
-    const data = await request('/api/v1/sso/applications/')
-    const list = Array.isArray(data) ? data : []
-    setCachedApplications(list)
-    return list
-  } catch (err) {
-    const cached = getCachedApplications()
-    if (cached != null) return cached
-    throw err
+// Barcha ommaviy hamkor SSO ilovalari ro'yxati (kesh va deduplikatsiya bilan)
+export async function getPublicApplications(force = false) {
+  // Agar allaqachon olingan bo'lsa va majburiy so'rov bo'lmasa, qayta tarmoq so'rovi yubormaymiz
+  if (!force && applicationsFetched && applicationsMemory) {
+    return applicationsMemory
   }
+
+  // Agar so'rov ayni paytda davom etayotgan bo'lsa, o'sha promiseni kutamiz (React StrictMode 2-mounti uchun)
+  if (inFlightApplications) {
+    return inFlightApplications
+  }
+
+  inFlightApplications = (async () => {
+    try {
+      const data = await request('/api/v1/sso/applications/')
+      const list = Array.isArray(data) ? data : []
+      setCachedApplications(list)
+      applicationsFetched = true
+      return list
+    } catch (err) {
+      const cached = getCachedApplications()
+      if (cached != null) return cached
+      throw err
+    } finally {
+      inFlightApplications = null
+    }
+  })()
+
+  return inFlightApplications
 }
 
 // Hamkor ilovalarini olish va sinxronlash uchun React hook
-export function usePublicApplications() {
+export function usePublicApplications(enabled = true) {
   const [apps, setApps] = useState(() => getCachedApplications() || [])
 
   useEffect(() => {
+    if (!enabled) return
+    if (applicationsFetched && applicationsMemory) return
+
     let active = true
     getPublicApplications()
       .then((data) => {
@@ -95,7 +119,7 @@ export function usePublicApplications() {
     return () => {
       active = false
     }
-  }, [])
+  }, [enabled])
 
   return apps
 }
