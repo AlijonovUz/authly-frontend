@@ -100,6 +100,7 @@ export default function DeveloperConsole({ onBackToProfile }) {
   // Toast state
   const [toast, setToast] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [showcaseDismissed, setShowcaseDismissed] = useState(false)
 
   // So'rovlarni nazorat qilish: bir vaqtda 2 ta so'rov ketmasligi va takrorlanmasligi uchun
   const fetchingRef = useRef(false)
@@ -586,29 +587,43 @@ export default function DeveloperConsole({ onBackToProfile }) {
             </div>
           </header>
 
-          {/* Hamkorlik va yon vitrinaga qo'shish info-banneri */}
-          <div className="dev-showcase-banner">
-            <div className="dev-showcase-banner__icon-wrap" aria-hidden="true">
-              <GlobeIcon width="22" height="22" />
-            </div>
-            <div className="dev-showcase-banner__content">
-              <div className="dev-showcase-banner__header">
-                <h3 className="dev-showcase-banner__title">{t('dev.showcaseTitle')}</h3>
-                <span className="dev-showcase-banner__badge">{t('dev.showcaseBadge')}</span>
+          {/* Hamkorlik va yon vitrinaga qo'shish ixcham info-banneri */}
+          {!showcaseDismissed && (
+            <div className="dev-showcase-banner">
+              <div className="dev-showcase-banner__left">
+                <div className="dev-showcase-banner__icon-wrap" aria-hidden="true">
+                  <GlobeIcon width="16" height="16" />
+                </div>
+                <div className="dev-showcase-banner__text">
+                  <strong className="dev-showcase-banner__title">{t('dev.showcaseTitle')}</strong>
+                  <span className="dev-showcase-banner__sep">—</span>
+                  <span className="dev-showcase-banner__desc">{t('dev.showcaseDesc')}</span>
+                </div>
               </div>
-              <p className="dev-showcase-banner__desc">{t('dev.showcaseDesc')}</p>
+
+              <div className="dev-showcase-banner__right">
+                <a
+                  href="https://t.me/AlijonovUz"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="dev-showcase-banner__action"
+                >
+                  <TelegramIcon width="14" height="14" />
+                  <span>{t('dev.showcaseAction')}</span>
+                  <ArrowUpRightIcon width="12" height="12" />
+                </a>
+                <button
+                  type="button"
+                  className="dev-showcase-banner__close"
+                  onClick={() => setShowcaseDismissed(true)}
+                  aria-label={t('common.close')}
+                  title={t('common.close')}
+                >
+                  <XIcon width="13" height="13" />
+                </button>
+              </div>
             </div>
-            <a
-              href="https://t.me/AlijonovUz"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="dev-showcase-banner__action"
-            >
-              <TelegramIcon width="16" height="16" />
-              <span>{t('dev.showcaseAction')}</span>
-              <ArrowUpRightIcon width="14" height="14" />
-            </a>
-          </div>
+          )}
 
           <div className="dev-table-card">
             {loading ? (
@@ -1013,6 +1028,7 @@ export default function DeveloperConsole({ onBackToProfile }) {
                               setModal({
                                 type: 'resetWebhookSecret',
                                 webhookId: selectedApp.webhook_info.id,
+                                targetUrl: selectedApp.webhook_info.target_url,
                               })
                             }
                           >
@@ -1026,6 +1042,7 @@ export default function DeveloperConsole({ onBackToProfile }) {
                               setModal({
                                 type: 'deleteWebhook',
                                 webhookId: selectedApp.webhook_info.id,
+                                targetUrl: selectedApp.webhook_info.target_url,
                               })
                             }
                           >
@@ -1387,9 +1404,14 @@ export default function DeveloperConsole({ onBackToProfile }) {
       {/* MODAL: Delete App Confirm */}
       {modal?.type === 'delete' && modal.app && (
         <div className="dev-modal-overlay" onClick={() => !submitting && setModal(null)}>
-          <div className="dev-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="dev-modal dev-modal--confirm" onClick={(e) => e.stopPropagation()}>
             <div className="dev-modal__header">
-              <h3 className="dev-modal__title">{t('dev.delete')}</h3>
+              <div className="dev-modal__title-group">
+                <span className="dev-confirm-badge dev-confirm-badge--danger" aria-hidden="true">
+                  <AlertTriangleIcon width="16" height="16" />
+                </span>
+                <h3 className="dev-modal__title">{t('dev.delete')}</h3>
+              </div>
               <button
                 type="button"
                 className="dev-modal__close"
@@ -1401,10 +1423,11 @@ export default function DeveloperConsole({ onBackToProfile }) {
             </div>
             <div className="dev-modal__body">
               <div className="dev-alert-box dev-alert-box--warning">
-                <AlertTriangleIcon width="18" height="18" style={{ flexShrink: 0 }} />
-                <span>
-                  <strong>{modal.app.name}</strong>: {t('dev.deleteConfirm')}
-                </span>
+                <AlertTriangleIcon width="18" height="18" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <div className="dev-alert-box__content">
+                  <p className="dev-alert-box__target">{modal.app.name}</p>
+                  <p className="dev-alert-box__message">{t('dev.deleteConfirm')}</p>
+                </div>
               </div>
             </div>
             <div className="dev-modal__footer">
@@ -1432,9 +1455,14 @@ export default function DeveloperConsole({ onBackToProfile }) {
       {/* MODAL: Reset Secret Confirm */}
       {modal?.type === 'resetSecret' && modal.app && (
         <div className="dev-modal-overlay" onClick={() => !submitting && setModal(null)}>
-          <div className="dev-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="dev-modal dev-modal--confirm" onClick={(e) => e.stopPropagation()}>
             <div className="dev-modal__header">
-              <h3 className="dev-modal__title">{t('dev.resetSecret')}</h3>
+              <div className="dev-modal__title-group">
+                <span className="dev-confirm-badge dev-confirm-badge--danger" aria-hidden="true">
+                  <AlertTriangleIcon width="16" height="16" />
+                </span>
+                <h3 className="dev-modal__title">{t('dev.resetSecret')}</h3>
+              </div>
               <button
                 type="button"
                 className="dev-modal__close"
@@ -1446,8 +1474,11 @@ export default function DeveloperConsole({ onBackToProfile }) {
             </div>
             <div className="dev-modal__body">
               <div className="dev-alert-box dev-alert-box--warning">
-                <AlertTriangleIcon width="18" height="18" style={{ flexShrink: 0 }} />
-                <span>{t('dev.resetSecretConfirm')}</span>
+                <AlertTriangleIcon width="18" height="18" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <div className="dev-alert-box__content">
+                  <p className="dev-alert-box__target">{modal.app.name}</p>
+                  <p className="dev-alert-box__message">{t('dev.resetSecretConfirm')}</p>
+                </div>
               </div>
             </div>
             <div className="dev-modal__footer">
@@ -1528,9 +1559,14 @@ export default function DeveloperConsole({ onBackToProfile }) {
       {/* MODAL: Delete Webhook Confirm */}
       {modal?.type === 'deleteWebhook' && (
         <div className="dev-modal-overlay" onClick={() => !submitting && setModal(null)}>
-          <div className="dev-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="dev-modal dev-modal--confirm" onClick={(e) => e.stopPropagation()}>
             <div className="dev-modal__header">
-              <h3 className="dev-modal__title">{t('dev.deleteWebhook')}</h3>
+              <div className="dev-modal__title-group">
+                <span className="dev-confirm-badge dev-confirm-badge--danger" aria-hidden="true">
+                  <AlertTriangleIcon width="16" height="16" />
+                </span>
+                <h3 className="dev-modal__title">{t('dev.deleteWebhook')}</h3>
+              </div>
               <button
                 type="button"
                 className="dev-modal__close"
@@ -1541,7 +1577,13 @@ export default function DeveloperConsole({ onBackToProfile }) {
               </button>
             </div>
             <div className="dev-modal__body">
-              <p className="dev-hint">{t('dev.deleteWebhookConfirm')}</p>
+              <div className="dev-alert-box dev-alert-box--warning">
+                <AlertTriangleIcon width="18" height="18" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <div className="dev-alert-box__content">
+                  {modal.targetUrl && <p className="dev-alert-box__target">{modal.targetUrl}</p>}
+                  <p className="dev-alert-box__message">{t('dev.deleteWebhookConfirm')}</p>
+                </div>
+              </div>
             </div>
             <div className="dev-modal__footer">
               <button
@@ -1568,9 +1610,14 @@ export default function DeveloperConsole({ onBackToProfile }) {
       {/* MODAL: Reset Webhook Secret Confirm */}
       {modal?.type === 'resetWebhookSecret' && (
         <div className="dev-modal-overlay" onClick={() => !submitting && setModal(null)}>
-          <div className="dev-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="dev-modal dev-modal--confirm" onClick={(e) => e.stopPropagation()}>
             <div className="dev-modal__header">
-              <h3 className="dev-modal__title">{t('dev.resetWebhookSecret')}</h3>
+              <div className="dev-modal__title-group">
+                <span className="dev-confirm-badge dev-confirm-badge--danger" aria-hidden="true">
+                  <AlertTriangleIcon width="16" height="16" />
+                </span>
+                <h3 className="dev-modal__title">{t('dev.resetWebhookSecret')}</h3>
+              </div>
               <button
                 type="button"
                 className="dev-modal__close"
@@ -1581,9 +1628,13 @@ export default function DeveloperConsole({ onBackToProfile }) {
               </button>
             </div>
             <div className="dev-modal__body">
-              <p className="dev-hint">
-                HMAC secret yangilanganda, oldingi secret orqali tekshiriladigan imzo (signature) yangisiga oʻzgaradi.
-              </p>
+              <div className="dev-alert-box dev-alert-box--warning">
+                <AlertTriangleIcon width="18" height="18" style={{ flexShrink: 0, marginTop: '1px' }} />
+                <div className="dev-alert-box__content">
+                  {modal.targetUrl && <p className="dev-alert-box__target">{modal.targetUrl}</p>}
+                  <p className="dev-alert-box__message">{t('dev.resetWebhookSecretConfirm')}</p>
+                </div>
+              </div>
             </div>
             <div className="dev-modal__footer">
               <button
