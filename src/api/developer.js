@@ -181,3 +181,26 @@ export async function resetDeveloperWebhookSecret(id) {
     body: {},
   })
 }
+
+/**
+ * Webhook yetkazilish loglarini (delivery logs) sahifalangan holda olish
+ * GET /api/v1/sso/developer/webhooks/{id}/logs/?page=1
+ * @param {string|number} id
+ * @param {{ page?: number }} params
+ */
+export async function getDeveloperWebhookLogs(id, { page = 1 } = {}) {
+  const key = `webhook_logs_${id}_${page}`
+  if (inFlightRequests.has(key)) {
+    return inFlightRequests.get(key)
+  }
+
+  const promise = request(`${WEBHOOKS_ENDPOINT}${id}/logs/`, {
+    method: 'GET',
+    query: { page },
+  }).finally(() => {
+    inFlightRequests.delete(key)
+  })
+
+  inFlightRequests.set(key, promise)
+  return promise
+}
