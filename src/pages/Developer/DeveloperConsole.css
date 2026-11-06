@@ -208,6 +208,125 @@
   line-height: 1.4;
 }
 
+/* ---------- Showcase Partnership Banner ---------- */
+.dev-showcase-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, rgba(238, 242, 255, 0.75) 0%, rgba(245, 243, 255, 0.55) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(99, 102, 241, 0.05);
+}
+
+.dev-showcase-banner:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.09);
+}
+
+.dev-showcase-banner__icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: #ffffff;
+  color: var(--accent-default);
+  border: 1px solid rgba(99, 102, 241, 0.16);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.08);
+  flex-shrink: 0;
+}
+
+.dev-showcase-banner__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.dev-showcase-banner__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.dev-showcase-banner__title {
+  font-family: var(--font-onest);
+  font-weight: 700;
+  font-size: 14.5px;
+  line-height: 20px;
+  color: var(--text-strong);
+  margin: 0;
+}
+
+.dev-showcase-banner__badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-family: var(--font-onest);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-default);
+  background: rgba(99, 102, 241, 0.12);
+  border-radius: 6px;
+}
+
+.dev-showcase-banner__desc {
+  font-family: var(--font-onest);
+  font-size: 13px;
+  line-height: 19px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.dev-showcase-banner__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  background: #0088cc;
+  color: #ffffff !important;
+  font-family: var(--font-onest);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 10px;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 136, 204, 0.25);
+  transition: all 0.18s ease;
+}
+
+.dev-showcase-banner__action:hover {
+  background: #0077b5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 136, 204, 0.35);
+  color: #ffffff !important;
+}
+
+.dev-showcase-banner__action svg {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .dev-showcase-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+  .dev-showcase-banner__action {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* ---------- Table Container with Infinite Scroll Pagination ---------- */
 .dev-table-card {
   background: var(--bg-surface);

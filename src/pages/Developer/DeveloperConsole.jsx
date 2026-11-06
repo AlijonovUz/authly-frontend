@@ -16,6 +16,7 @@ import { getApiErrorMessage } from '../../api/client.js'
 import {
   AlertTriangleIcon,
   ArrowLeftIcon,
+  ArrowUpRightIcon,
   CheckIcon,
   CodeIcon,
   CopyIcon,
@@ -26,6 +27,7 @@ import {
   KeyIcon,
   PlusIcon,
   RefreshCwIcon,
+  TelegramIcon,
   TrashIcon,
   WebhookIcon,
   XIcon,
@@ -583,6 +585,30 @@ export default function DeveloperConsole({ onBackToProfile }) {
               </button>
             </div>
           </header>
+
+          {/* Hamkorlik va yon vitrinaga qo'shish info-banneri */}
+          <div className="dev-showcase-banner">
+            <div className="dev-showcase-banner__icon-wrap" aria-hidden="true">
+              <GlobeIcon width="22" height="22" />
+            </div>
+            <div className="dev-showcase-banner__content">
+              <div className="dev-showcase-banner__header">
+                <h3 className="dev-showcase-banner__title">{t('dev.showcaseTitle')}</h3>
+                <span className="dev-showcase-banner__badge">{t('dev.showcaseBadge')}</span>
+              </div>
+              <p className="dev-showcase-banner__desc">{t('dev.showcaseDesc')}</p>
+            </div>
+            <a
+              href="https://t.me/AlijonovUz"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="dev-showcase-banner__action"
+            >
+              <TelegramIcon width="16" height="16" />
+              <span>{t('dev.showcaseAction')}</span>
+              <ArrowUpRightIcon width="14" height="14" />
+            </a>
+          </div>
 
           <div className="dev-table-card">
             {loading ? (

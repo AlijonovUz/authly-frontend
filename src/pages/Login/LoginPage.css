@@ -513,6 +513,8 @@
 /* Ro'yxatdan o'tish yakunlandi */
 
 .registered {
+  margin-top: auto;
+  margin-bottom: auto;
   gap: 32px;
   animation: registered-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -2089,7 +2091,8 @@
 @media (max-width: 600px) {
   .registered {
     gap: 24px;
-    margin-top: 32px;
+    margin-top: auto;
+    margin-bottom: auto;
   }
   .registered .form__title {
     font-size: 30px;
@@ -2155,6 +2158,11 @@
 
 .login__panel--profile .panel__footer {
   display: none;
+}
+
+.login__panel--profile .registered {
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .profile-view {
