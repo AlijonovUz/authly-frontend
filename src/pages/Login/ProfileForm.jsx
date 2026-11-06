@@ -3,7 +3,7 @@ import { clearAllAuthCaches, getCachedUser, getMe, isProfileComplete, logout, sa
 import { getApiErrorMessage, mediaUrl } from '../../api/client.js'
 import { getCachedDistricts, getCachedRegions, getDistricts, getRegions } from '../../api/references.js'
 import { getPublicApplications, returnToSource } from '../../api/sso.js'
-import { LogOutIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
+import { CodeIcon, LogOutIcon, PlusIcon, UserIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import { getSourceSite } from '../../utils/sourceSite.js'
 import { Field, FormAlert } from './FormParts.jsx'
@@ -11,6 +11,7 @@ import DateField from './DateField.jsx'
 import LinkedAccounts from './LinkedAccounts.jsx'
 import RegisteredView from './RegisteredView.jsx'
 import SearchSelect from './SearchSelect.jsx'
+import '../Developer/DeveloperConsole.css'
 
 const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
 const ThinUserIcon = thinIcon(UserIcon)
@@ -261,108 +262,129 @@ function ProfileForm() {
   }
 
   return (
-    <form className="form form--profile" onSubmit={handleSubmit} noValidate>
-      <div className="form__heading">
-        <h2 className="form__title">{t(existing ? 'profile.editTitle' : 'profile.title')}</h2>
-        <p className="form__subtitle">{t(existing ? 'profile.editSubtitle' : 'profile.subtitle')}</p>
-      </div>
-
-      {saveError && (
-        <FormAlert title={t('phone.errorTitle')} message={saveError.message ?? t('common.errorText')} />
-      )}
-
-      <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
-
-      <div className="profile__fields">
-        <div className="profile__row profile__row--names">
-          <Field
-            id="firstName"
-            label={t('field.firstName')}
-            icon={ThinUserIcon}
-            placeholder={t('field.firstNamePlaceholder')}
-            autoComplete="given-name"
-            value={form.firstName}
-            onChange={update('firstName')}
-            error={errors.firstName}
-          />
-          <Field
-            id="lastName"
-            label={t('field.lastName')}
-            icon={ThinUserIcon}
-            placeholder={t('field.lastNamePlaceholder')}
-            autoComplete="family-name"
-            value={form.lastName}
-            onChange={update('lastName')}
-            error={errors.lastName}
-          />
-        </div>
-
-        <div className="profile__row">
-          <SearchSelect
-            id="region"
-            label={t('field.region')}
-            placeholder={t(isPhone ? 'common.select' : 'field.regionPlaceholder')}
-            searchPlaceholder={t('field.regionSearch')}
-            options={regions}
-            value={form.region}
-            onChange={(region) =>
-              setForm((f) => (f.region === region ? f : { ...f, region, district: '' }))
-            }
-            error={errors.region}
-          />
-          <SearchSelect
-            id="district"
-            label={t('field.district')}
-            placeholder={t(isPhone ? 'common.select' : 'field.districtPlaceholder')}
-            searchPlaceholder={t('field.districtSearch')}
-            options={districts}
-            value={form.district}
-            onChange={(district) => setForm((f) => ({ ...f, district }))}
-            align="end"
-            error={errors.district}
-            disabled={!form.region}
-          />
-        </div>
-
-        <DateField
-          id="birthDate"
-          label={t('field.birthDate')}
-          placeholder={t('field.birthDatePlaceholder')}
-          value={form.birthDate}
-          onChange={(birthDate) => setForm((f) => ({ ...f, birthDate }))}
-          error={errors.birthDate}
-        />
-      </div>
-
-      {currentUser && (
-        <LinkedAccounts
-          user={currentUser}
-          onUserUpdated={(updatedUser) => {
-            setCurrentUser(updatedUser)
-            setCachedUser(updatedUser)
-          }}
-        />
-      )}
-
-      <div className="profile__actions">
-        <button
-          type="submit"
-          className="btn-primary btn-primary--lg"
-          disabled={!isComplete || submitting || loggingOut}
-        >
-          {t(existing ? 'profile.save' : 'profile.submit')}
+    <div className="profile-view">
+      {/* Profil va Dasturchilar paneli o'rtasidagi tablar (Tepada qotib turadi) */}
+      <nav className="profile-tabs" aria-label="Sections">
+        <button type="button" className="profile-tab is-active">
+          <UserIcon width="16" height="16" />
+          {t('tabs.profile')}
         </button>
         <button
           type="button"
-          className="btn-logout"
-          onClick={handleLogout}
-          disabled={loggingOut || submitting}
+          className="profile-tab"
+          onClick={() => {
+            window.location.hash = '#/developer'
+          }}
         >
-          <LogOutIcon width="18" height="18" />
-          {t('profile.logout')}
+          <CodeIcon width="16" height="16" />
+          {t('tabs.developer')}
         </button>
-      </div>
-    </form>
+      </nav>
+
+      {/* Faqat forma va uning ostidagi narsalar ichki scroll bo'ladi */}
+      <form className="form form--profile profile-scrollable" onSubmit={handleSubmit} noValidate>
+        <div className="form__heading">
+          <h2 className="form__title">{t(existing ? 'profile.editTitle' : 'profile.title')}</h2>
+          <p className="form__subtitle">{t(existing ? 'profile.editSubtitle' : 'profile.subtitle')}</p>
+        </div>
+
+        {saveError && (
+          <FormAlert title={t('phone.errorTitle')} message={saveError.message ?? t('common.errorText')} />
+        )}
+
+        <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
+
+        <div className="profile__fields">
+          <div className="profile__row profile__row--names">
+            <Field
+              id="firstName"
+              label={t('field.firstName')}
+              icon={ThinUserIcon}
+              placeholder={t('field.firstNamePlaceholder')}
+              autoComplete="given-name"
+              value={form.firstName}
+              onChange={update('firstName')}
+              error={errors.firstName}
+            />
+            <Field
+              id="lastName"
+              label={t('field.lastName')}
+              icon={ThinUserIcon}
+              placeholder={t('field.lastNamePlaceholder')}
+              autoComplete="family-name"
+              value={form.lastName}
+              onChange={update('lastName')}
+              error={errors.lastName}
+            />
+          </div>
+
+          <div className="profile__row">
+            <SearchSelect
+              id="region"
+              label={t('field.region')}
+              placeholder={t(isPhone ? 'common.select' : 'field.regionPlaceholder')}
+              searchPlaceholder={t('field.regionSearch')}
+              options={regions}
+              value={form.region}
+              onChange={(region) =>
+                setForm((f) => (f.region === region ? f : { ...f, region, district: '' }))
+              }
+              error={errors.region}
+            />
+            <SearchSelect
+              id="district"
+              label={t('field.district')}
+              placeholder={t(isPhone ? 'common.select' : 'field.districtPlaceholder')}
+              searchPlaceholder={t('field.districtSearch')}
+              options={districts}
+              value={form.district}
+              onChange={(district) => setForm((f) => ({ ...f, district }))}
+              align="end"
+              error={errors.district}
+              disabled={!form.region}
+            />
+          </div>
+
+          <DateField
+            id="birthDate"
+            label={t('field.birthDate')}
+            placeholder={t('field.birthDatePlaceholder')}
+            value={form.birthDate}
+            onChange={(birthDate) => setForm((f) => ({ ...f, birthDate }))}
+            error={errors.birthDate}
+          />
+        </div>
+
+        {currentUser && (
+          <LinkedAccounts
+            user={currentUser}
+            onUserUpdated={(updatedUser) => {
+              setCurrentUser(updatedUser)
+              setCachedUser(updatedUser)
+            }}
+          />
+        )}
+
+        <div className="profile__actions">
+          <button
+            type="submit"
+            className="btn-primary btn-primary--lg"
+            disabled={!isComplete || submitting || loggingOut}
+          >
+            {t(existing ? 'profile.save' : 'profile.submit')}
+          </button>
+          <button
+            type="button"
+            className="btn-logout"
+            onClick={handleLogout}
+            disabled={loggingOut || submitting}
+          >
+            <LogOutIcon width="18" height="18" />
+            {t('profile.logout')}
+          </button>
+        </div>
+      </form>
+    </div>
   )
 }
 

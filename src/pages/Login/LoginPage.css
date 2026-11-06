@@ -2111,3 +2111,98 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Developer Console Panel ---------- */
+.login__panel--developer {
+  justify-content: flex-start;
+  align-items: stretch;
+  height: calc(100vh - 40px);
+  overflow: hidden;
+  padding: 24px 48px 24px;
+}
+
+.login__panel--developer .panel__top {
+  max-width: 100%;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.login__panel--developer .dev-console {
+  max-width: 100%;
+  flex: 1;
+  min-height: 0;
+}
+
+.login__panel--developer .panel__footer {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .login__panel--developer {
+    padding: 20px 16px;
+    height: 100vh;
+  }
+}
+/* ---------- Profile Panel & Internal Scroll ---------- */
+.login__panel--profile {
+  justify-content: flex-start;
+  align-items: center;
+  height: calc(100vh - 40px);
+  overflow: hidden;
+  padding: 24px 64px 24px;
+}
+
+.login__panel--profile .panel__top {
+  max-width: 532px;
+  flex-shrink: 0;
+  margin-bottom: 8px;
+}
+
+.login__panel--profile .panel__footer {
+  display: none;
+}
+
+.profile-view {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 532px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.profile-scrollable {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 6px;
+  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.profile-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-scrollable::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.profile-scrollable::-webkit-scrollbar-thumb {
+  background: var(--border-sub);
+  border-radius: 4px;
+}
+
+.profile-scrollable::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
+}
+
+@media (max-width: 600px) {
+  .login__panel--profile {
+    padding: 20px 16px;
+    height: 100vh;
+  }
+}
