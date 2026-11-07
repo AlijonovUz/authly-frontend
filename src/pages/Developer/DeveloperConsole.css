@@ -816,6 +816,16 @@
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
+.dev-credential-actions-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dev-credential-btn-text {
+  display: none;
+}
+
 .dev-credential-inline {
   display: flex;
   align-items: center;
@@ -1781,15 +1791,78 @@
     white-space: normal;
   }
   .dev-credential-card {
-    padding: 10px 12px;
-    gap: 8px;
+    padding: 12px 14px;
+    gap: 10px;
+    border-radius: 12px;
   }
   .dev-credential-code {
     font-size: 12px;
   }
-  .dev-credential-actions {
-    justify-content: flex-start;
-    gap: 6px;
+  .dev-credential-card .dev-credential-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+    padding-top: 10px !important;
+    border-top: 1px solid rgba(0, 0, 0, 0.06) !important;
+  }
+  .dev-credential-actions-group {
+    display: grid !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+  .dev-credential-actions-group--quick {
+    grid-template-columns: 1fr 1fr !important;
+  }
+  .dev-credential-actions-group--danger {
+    grid-template-columns: 1fr !important;
+  }
+  .dev-credential-btn-text {
+    display: inline !important;
+  }
+  .dev-credential-card .dev-credential-actions .dev-btn-secondary,
+  .dev-credential-card .dev-credential-actions .dev-btn-danger,
+  .dev-credential-card .dev-credential-actions .dev-btn-ghost {
+    width: 100% !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    border-radius: 9px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+  }
+  .dev-credential-card .dev-credential-actions .dev-btn-ghost {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border-subtle) !important;
+    color: var(--text-muted) !important;
+  }
+  .dev-credential-card .dev-credential-actions .dev-btn-ghost:hover {
+    color: var(--text-strong) !important;
+    border-color: var(--border-sub) !important;
+  }
+  .dev-credential-inline {
+    padding: 8px 12px;
+    gap: 8px;
+    border-radius: 9px;
+  }
+  .dev-credential-inline .dev-credential-actions {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    padding-top: 0 !important;
+    border-top: none !important;
+    width: auto !important;
+  }
+  .dev-credential-inline .dev-credential-actions .dev-btn-secondary {
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    width: auto !important;
   }
   .dev-guide-platform-tabs {
     width: 100%;
@@ -1898,33 +1971,6 @@
   .dev-code-chip {
     max-width: 120px;
   }
-  .dev-credential-actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 6px;
-    flex-wrap: wrap;
-    width: 100%;
-  }
-  .dev-credential-actions .dev-btn-secondary,
-  .dev-credential-actions .dev-btn-danger,
-  .dev-credential-actions .dev-btn-ghost {
-    width: auto;
-    padding: 6px 10px;
-    font-size: 12px;
-    height: 32px;
-  }
-  .dev-credential-inline {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-  .dev-credential-inline .dev-credential-actions {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 6px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
-  }
   .dev-guide-docs-actions {
     grid-template-columns: 1fr;
   }
@@ -1940,9 +1986,6 @@
     padding: 6px 4px;
     font-size: 11px;
     gap: 4px;
-  }
-  .dev-credential-actions {
-    grid-template-columns: 1fr;
   }
 }
 

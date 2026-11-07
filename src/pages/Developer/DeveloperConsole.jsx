@@ -943,40 +943,47 @@ export default function DeveloperConsole({ onBackToProfile }) {
                         </span>
                       </div>
                       <div className="dev-credential-actions">
-                        {selectedApp.client_secret && (
+                        <div className="dev-credential-actions-group dev-credential-actions-group--quick">
+                          {selectedApp.client_secret && (
+                            <button
+                              type="button"
+                              className="dev-btn-ghost dev-btn-sm"
+                              onClick={() => setShowSecret((v) => !v)}
+                              title={showSecret ? t('dev.hide') : t('dev.show')}
+                            >
+                              {showSecret ? (
+                                <EyeOffIcon width="15" height="15" />
+                              ) : (
+                                <EyeIcon width="15" height="15" />
+                              )}
+                              <span className="dev-credential-btn-text">
+                                {showSecret ? t('dev.hide') : t('dev.show')}
+                              </span>
+                            </button>
+                          )}
+                          {selectedApp.client_secret && (
+                            <button
+                              type="button"
+                              className="dev-btn-secondary dev-btn-sm"
+                              onClick={() =>
+                                handleCopy(selectedApp.client_secret, t('dev.clientSecret'))
+                              }
+                            >
+                              <CopyIcon width="13" height="13" />
+                              <span>{t('dev.copy')}</span>
+                            </button>
+                          )}
+                        </div>
+                        <div className="dev-credential-actions-group dev-credential-actions-group--danger">
                           <button
                             type="button"
-                            className="dev-btn-ghost dev-btn-sm"
-                            onClick={() => setShowSecret((v) => !v)}
-                            title={showSecret ? 'Hide' : 'Show'}
+                            className="dev-btn-danger dev-btn-sm"
+                            onClick={() => setModal({ type: 'resetSecret', app: selectedApp })}
                           >
-                            {showSecret ? (
-                              <EyeOffIcon width="15" height="15" />
-                            ) : (
-                              <EyeIcon width="15" height="15" />
-                            )}
+                            <RefreshCwIcon width="13" height="13" />
+                            <span>{t('dev.resetSecret')}</span>
                           </button>
-                        )}
-                        {selectedApp.client_secret && (
-                          <button
-                            type="button"
-                            className="dev-btn-secondary dev-btn-sm"
-                            onClick={() =>
-                              handleCopy(selectedApp.client_secret, t('dev.clientSecret'))
-                            }
-                          >
-                            <CopyIcon width="13" height="13" />
-                            {t('dev.copy')}
-                          </button>
-                        )}
-                        <button
-                          type="button"
-                          className="dev-btn-danger dev-btn-sm"
-                          onClick={() => setModal({ type: 'resetSecret', app: selectedApp })}
-                        >
-                          <RefreshCwIcon width="13" height="13" />
-                          {t('dev.resetSecret')}
-                        </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -1060,6 +1067,18 @@ export default function DeveloperConsole({ onBackToProfile }) {
                             {selectedApp.webhook_info.url}
                           </span>
                         </div>
+                        <div className="dev-credential-actions">
+                          <button
+                            type="button"
+                            className="dev-btn-secondary dev-btn-sm"
+                            onClick={() =>
+                              handleCopy(selectedApp.webhook_info.url, t('dev.webhookUrl'))
+                            }
+                          >
+                            <CopyIcon width="13" height="13" />
+                            <span>{t('dev.copy')}</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -1077,63 +1096,70 @@ export default function DeveloperConsole({ onBackToProfile }) {
                           </span>
                         </div>
                         <div className="dev-credential-actions">
-                          {selectedApp.webhook_info.secret && (
-                            <button
-                              type="button"
-                              className="dev-btn-ghost dev-btn-sm"
-                              onClick={() => setShowWebhookSecret((v) => !v)}
-                              title={showWebhookSecret ? t('dev.hide') : t('dev.show')}
-                            >
-                              {showWebhookSecret ? (
-                                <EyeOffIcon width="15" height="15" />
-                              ) : (
-                                <EyeIcon width="15" height="15" />
-                              )}
-                            </button>
-                          )}
-                          {selectedApp.webhook_info.secret && (
+                          <div className="dev-credential-actions-group dev-credential-actions-group--quick">
+                            {selectedApp.webhook_info.secret && (
+                              <button
+                                type="button"
+                                className="dev-btn-ghost dev-btn-sm"
+                                onClick={() => setShowWebhookSecret((v) => !v)}
+                                title={showWebhookSecret ? t('dev.hide') : t('dev.show')}
+                              >
+                                {showWebhookSecret ? (
+                                  <EyeOffIcon width="15" height="15" />
+                                ) : (
+                                  <EyeIcon width="15" height="15" />
+                                )}
+                                <span className="dev-credential-btn-text">
+                                  {showWebhookSecret ? t('dev.hide') : t('dev.show')}
+                                </span>
+                              </button>
+                            )}
+                            {selectedApp.webhook_info.secret && (
+                              <button
+                                type="button"
+                                className="dev-btn-secondary dev-btn-sm"
+                                onClick={() =>
+                                  handleCopy(
+                                    selectedApp.webhook_info.secret,
+                                    t('dev.webhookSecret'),
+                                  )
+                                }
+                              >
+                                <CopyIcon width="13" height="13" />
+                                <span>{t('dev.copy')}</span>
+                              </button>
+                            )}
+                          </div>
+                          <div className="dev-credential-actions-group dev-credential-actions-group--danger">
                             <button
                               type="button"
                               className="dev-btn-secondary dev-btn-sm"
                               onClick={() =>
-                                handleCopy(
-                                  selectedApp.webhook_info.secret,
-                                  t('dev.webhookSecret'),
-                                )
+                                setModal({
+                                  type: 'resetWebhookSecret',
+                                  webhookId: selectedApp.webhook_info.id,
+                                  targetUrl: selectedApp.webhook_info.target_url,
+                                })
                               }
                             >
-                              <CopyIcon width="13" height="13" />
-                              {t('dev.copy')}
+                              <RefreshCwIcon width="13" height="13" />
+                              <span>{t('dev.resetWebhookSecret')}</span>
                             </button>
-                          )}
-                          <button
-                            type="button"
-                            className="dev-btn-secondary dev-btn-sm"
-                            onClick={() =>
-                              setModal({
-                                type: 'resetWebhookSecret',
-                                webhookId: selectedApp.webhook_info.id,
-                                targetUrl: selectedApp.webhook_info.target_url,
-                              })
-                            }
-                          >
-                            <RefreshCwIcon width="13" height="13" />
-                            {t('dev.resetWebhookSecret')}
-                          </button>
-                          <button
-                            type="button"
-                            className="dev-btn-danger dev-btn-sm"
-                            onClick={() =>
-                              setModal({
-                                type: 'deleteWebhook',
-                                webhookId: selectedApp.webhook_info.id,
-                                targetUrl: selectedApp.webhook_info.target_url,
-                              })
-                            }
-                          >
-                            <TrashIcon width="13" height="13" />
-                            {t('dev.deleteWebhook')}
-                          </button>
+                            <button
+                              type="button"
+                              className="dev-btn-danger dev-btn-sm"
+                              onClick={() =>
+                                setModal({
+                                  type: 'deleteWebhook',
+                                  webhookId: selectedApp.webhook_info.id,
+                                  targetUrl: selectedApp.webhook_info.target_url,
+                                })
+                              }
+                            >
+                              <TrashIcon width="13" height="13" />
+                              <span>{t('dev.deleteWebhook')}</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
