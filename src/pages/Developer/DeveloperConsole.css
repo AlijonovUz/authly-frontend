@@ -373,7 +373,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
-  max-height: calc(100vh - 270px);
+  flex: 1;
   min-height: 240px;
 }
 
@@ -459,6 +459,11 @@
   background: var(--bg-subtle);
   border-top: 1px solid var(--border-subtle);
   flex-shrink: 0;
+}
+
+/* Mobil ilovalar kartalari ro'yxati (Desktopda yashirin) */
+.dev-cards-list {
+  display: none;
 }
 
 .dev-app-name-cell {
@@ -602,7 +607,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 12px;
+  flex: 1;
 }
 
 .dev-empty-icon {
@@ -1630,11 +1637,16 @@
     padding: 3px;
     border-radius: 10px;
     margin-bottom: 12px;
+    width: 100%;
   }
   .profile-tab {
-    padding: 8px 10px;
+    flex: 1 1 50%;
+    min-width: 0;
+    padding: 8px 6px;
     font-size: 13px;
     gap: 6px;
+    white-space: nowrap;
+    justify-content: center;
   }
   .dev-header__top {
     flex-direction: column;
@@ -1669,12 +1681,90 @@
     height: 32px;
   }
   .dev-table {
-    min-width: 580px;
+    display: none !important;
   }
-  .dev-table th,
-  .dev-table td {
-    padding: 10px 10px;
-    font-size: 12.5px;
+  .dev-table-wrapper {
+    overflow-x: hidden;
+  }
+  .dev-table-card {
+    min-height: 0;
+  }
+  .dev-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  .dev-app-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: border-color 0.15s ease;
+  }
+  .dev-app-card:hover {
+    border-color: var(--border-sub);
+  }
+  .dev-app-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .dev-app-card__header .dev-app-name-cell {
+    min-width: 0;
+    flex: 1;
+  }
+  .dev-app-card__header .dev-app-title-link {
+    font-size: 15px;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .dev-app-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-subtle);
+    padding: 10px 12px;
+    border-radius: 10px;
+  }
+  .dev-app-card__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .dev-app-card__label {
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .dev-app-card__date {
+    color: var(--text-strong);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .dev-app-card__actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+  }
+  .dev-app-card__action-btn {
+    height: 36px;
+    padding: 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 8px;
   }
   .dev-card {
     padding: 14px 14px;
@@ -1782,11 +1872,13 @@
 /* 4. Kichik mobil telefonlar (<= 480px) */
 @media (max-width: 480px) {
   .profile-tabs {
-    padding: 2px;
+    padding: 3px;
+    gap: 3px;
   }
   .profile-tab {
-    padding: 7px 8px;
+    padding: 7px 4px;
     font-size: 12px;
+    gap: 5px;
   }
   .dev-header__title {
     font-size: 18px;
@@ -1861,19 +1953,21 @@
   }
   .dev-btn-responsive-icon {
     padding: 0 !important;
-    width: 32px !important;
-    height: 32px !important;
+    width: 36px !important;
+    height: 36px !important;
     justify-content: center !important;
+    border-radius: 9px !important;
   }
   .dev-action-edit-btn {
-    padding: 0 8px !important;
-    height: 32px !important;
+    padding: 0 10px !important;
+    height: 36px !important;
     font-size: 12px !important;
+    border-radius: 9px !important;
   }
   .dev-detail__sticky-header {
     gap: 6px !important;
   }
   .dev-detail__top-actions {
-    gap: 4px !important;
+    gap: 5px !important;
   }
 }

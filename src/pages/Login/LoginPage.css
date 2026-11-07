@@ -2179,28 +2179,21 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
-  padding-right: 6px;
+  padding-right: 0;
   padding-bottom: 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
+  /* Scrollbarni ko'rinmaydigan qilish */
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .profile-scrollable::-webkit-scrollbar {
-  width: 6px;
-}
-
-.profile-scrollable::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.profile-scrollable::-webkit-scrollbar-thumb {
-  background: var(--border-sub);
-  border-radius: 4px;
-}
-
-.profile-scrollable::-webkit-scrollbar-thumb:hover {
-  background: var(--text-faint);
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Planshetlar (601px - 1024px) */
@@ -2236,7 +2229,7 @@
     max-width: 100%;
   }
   .profile-scrollable {
-    padding-right: 2px;
+    padding-right: 0;
     gap: 18px;
   }
 }
@@ -2322,4 +2315,30 @@
 .profile__actions .btn-logout svg {
   width: 16px;
   height: 16px;
+}
+
+/* Mobil qurilmalarda Saqlash va Chiqish tugmalarini tegma-teg (ustma-ust) qilish */
+@media (max-width: 600px) {
+  .profile__actions {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px !important;
+    margin-top: 14px !important;
+    width: 100% !important;
+  }
+
+  .profile__actions .btn-primary--lg,
+  .profile__actions .btn-logout {
+    width: 100% !important;
+    height: 48px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    justify-content: center !important;
+  }
+
+  .profile__actions .btn-logout {
+    height: 44px !important;
+    font-size: 14px !important;
+  }
 }

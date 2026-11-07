@@ -740,6 +740,91 @@ export default function DeveloperConsole({ onBackToProfile }) {
                   </tbody>
                 </table>
 
+                {/* Mobil qurilmalar uchun to'liq moslashuvchan Card ko'rinishi */}
+                <div className="dev-cards-list">
+                  {apps.map((app) => (
+                    <div key={app.id} className="dev-app-card">
+                      <div className="dev-app-card__header">
+                        <div className="dev-app-name-cell">
+                          <span className="dev-app-icon">
+                            <KeyIcon width="16" height="16" />
+                          </span>
+                          <button
+                            type="button"
+                            className="dev-app-title-link"
+                            onClick={() => openDetail(app.id)}
+                          >
+                            {app.name}
+                          </button>
+                        </div>
+                        {app.webhook_info ? (
+                          <span
+                            className={`dev-badge ${
+                              app.webhook_info.is_active
+                                ? 'dev-badge--active'
+                                : 'dev-badge--inactive'
+                            }`}
+                          >
+                            {app.webhook_info.is_active ? t('dev.active') : t('dev.inactive')}
+                          </span>
+                        ) : (
+                          <span className="dev-badge dev-badge--none">
+                            {t('dev.noWebhook')}
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="dev-app-card__body">
+                        <div className="dev-app-card__row">
+                          <span className="dev-app-card__label">{t('dev.tableColClientId')}:</span>
+                          <div className="dev-code-chip">
+                            <span>{app.client_id}</span>
+                            <button
+                              type="button"
+                              className="dev-copy-btn"
+                              title={t('dev.copy')}
+                              onClick={() => handleCopy(app.client_id, t('dev.clientId'))}
+                            >
+                              <CopyIcon width="13" height="13" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="dev-app-card__row">
+                          <span className="dev-app-card__label">{t('dev.tableColCreated')}:</span>
+                          <span className="dev-app-card__date">{formatDate(app.created)}</span>
+                        </div>
+                      </div>
+
+                      <div className="dev-app-card__actions">
+                        <button
+                          type="button"
+                          className="dev-btn-secondary dev-app-card__action-btn"
+                          onClick={() => openDetail(app.id)}
+                        >
+                          <EyeIcon width="14" height="14" />
+                          <span>{t('dev.details')}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="dev-btn-secondary dev-app-card__action-btn"
+                          onClick={() => setModal({ type: 'edit', app })}
+                        >
+                          <EditIcon width="14" height="14" />
+                          <span>{t('dev.edit')}</span>
+                        </button>
+                        <button
+                          type="button"
+                          className="dev-btn-danger dev-app-card__action-btn"
+                          onClick={() => setModal({ type: 'delete', app })}
+                        >
+                          <TrashIcon width="14" height="14" />
+                          <span>{t('dev.delete')}</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Keyingi sahifa yuklanayotgan bo'lsa indikator */}
                 {loadingMore && (
                   <div className="dev-table-more-loading">
