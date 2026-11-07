@@ -11,6 +11,7 @@ import DateField from './DateField.jsx'
 import LinkedAccounts from './LinkedAccounts.jsx'
 import RegisteredView from './RegisteredView.jsx'
 import SearchSelect from './SearchSelect.jsx'
+import AvatarCropModal from './AvatarCropModal.jsx'
 import '../Developer/DeveloperConsole.css'
 
 const thinIcon = (Icon) => (props) => <Icon strokeWidth={1.5} {...props} />
@@ -58,8 +59,16 @@ function validate(form, t) {
   return errors
 }
 
-function AvatarPicker({ photoUrl, onChange }) {
+function AvatarPicker({ photoUrl, onFileSelected }) {
   const { t } = useI18n()
+  const handleChange = (e) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      onFileSelected(file)
+    }
+    e.target.value = ''
+  }
+
   return (
     <div className="avatar">
       <label className="avatar__picker">
@@ -67,7 +76,7 @@ function AvatarPicker({ photoUrl, onChange }) {
           type="file"
           accept="image/*"
           className="visually-hidden"
-          onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+          onChange={handleChange}
         />
         <span className="avatar__circle">
           {photoUrl ? (
@@ -105,6 +114,7 @@ function ProfileForm() {
       : null,
   )
   const [submitted, setSubmitted] = useState(false)
+  const [cropSourceFile, setCropSourceFile] = useState(null)
   const isPhone = useIsPhone()
   const [submitting, setSubmitting] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
@@ -192,8 +202,9 @@ function ProfileForm() {
     }
   }, [form.region])
 
-  const pickPhoto = (file) => {
-    if (file) setPhoto({ file, url: URL.createObjectURL(file) })
+  const handleCropComplete = (croppedFile, croppedUrl) => {
+    setPhoto({ file: croppedFile, url: croppedUrl })
+    setCropSourceFile(null)
   }
 
   // Hamma maydon to'g'ri to'ldirilmaguncha "Davom etish" nofaol
@@ -292,7 +303,7 @@ function ProfileForm() {
           <FormAlert title={t('phone.errorTitle')} message={saveError.message ?? t('common.errorText')} />
         )}
 
-        <AvatarPicker photoUrl={photo?.url} onChange={pickPhoto} />
+        <AvatarPicker photoUrl={photo?.url} onFileSelected={setCropSourceFile} />
 
         <div className="profile__fields">
           <div className="profile__row profile__row--names">
@@ -384,6 +395,14 @@ function ProfileForm() {
           </button>
         </div>
       </form>
+
+      {cropSourceFile && (
+        <AvatarCropModal
+          file={cropSourceFile}
+          onCrop={handleCropComplete}
+          onCancel={() => setCropSourceFile(null)}
+        />
+      )}
     </div>
   )
 }
