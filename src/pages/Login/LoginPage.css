@@ -2298,6 +2298,8 @@
 
 .profile__actions .btn-primary--lg {
   height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
   font-size: 14px !important;
   font-weight: 600 !important;
   border-radius: 10px !important;
@@ -2305,6 +2307,8 @@
 
 .profile__actions .btn-logout {
   height: 42px !important;
+  min-height: 42px !important;
+  max-height: 42px !important;
   padding: 0 16px !important;
   font-size: 14px !important;
   font-weight: 600 !important;
@@ -2325,20 +2329,39 @@
     gap: 10px !important;
     margin-top: 14px !important;
     width: 100% !important;
+    flex-shrink: 0 !important;
   }
 
-  .profile__actions .btn-primary--lg,
-  .profile__actions .btn-logout {
+  .profile__actions .btn-primary,
+  .profile__actions .btn-primary--lg {
+    flex: none !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
     width: 100% !important;
     height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
     font-size: 15px !important;
     font-weight: 600 !important;
     border-radius: 12px !important;
     justify-content: center !important;
+    line-height: normal !important;
+    padding: 0 16px !important;
   }
 
   .profile__actions .btn-logout {
+    flex: none !important;
+    flex-grow: 0 !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
     height: 44px !important;
+    min-height: 44px !important;
+    max-height: 44px !important;
     font-size: 14px !important;
+    font-weight: 600 !important;
+    border-radius: 12px !important;
+    justify-content: center !important;
+    line-height: normal !important;
+    padding: 0 16px !important;
   }
 }

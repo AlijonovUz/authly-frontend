@@ -1793,15 +1793,27 @@
   }
   .dev-guide-platform-tabs {
     width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-    padding: 3px;
+    max-width: 100%;
+    display: flex;
+    align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 4px;
+    border-radius: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    box-sizing: border-box;
+  }
+  .dev-guide-platform-tabs::-webkit-scrollbar {
+    display: none;
   }
   .dev-guide-platform-tab {
+    flex-shrink: 0;
+    white-space: nowrap;
     justify-content: center;
-    padding: 7px 6px;
-    font-size: 12.5px;
+    padding: 7px 14px;
+    font-size: 13px;
   }
   .dev-guide-tech-tabs {
     flex-wrap: nowrap;
