@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { RefreshCwIcon, XIcon } from '../../components/icons.jsx'
 import { useI18n } from '../../i18n/context.js'
 import './AvatarCropModal.css'
@@ -7,10 +7,9 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
   const { t } = useI18n()
   const [imgSrc] = useState(() => (file ? URL.createObjectURL(file) : null))
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 })
-  const [zoom, setZoom] = useState(1)
-  const [baseZoom, setBaseZoom] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
   const [rotation, setRotation] = useState(0)
+  const [zoom, setZoom] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
   const [processing, setProcessing] = useState(false)
 
   const imgRef = useRef(null)
@@ -38,23 +37,60 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
     }
   }, [imgSrc])
 
-  // Rasm to'liq yuklangach o'lchamlarini olish va dastlabki moslash
+  // Aylanishni hisobga olgan holda rasmning samarali o'lchamlari
+  const isRotated = rotation % 180 !== 0
+  const effWidth = isRotated ? naturalSize.height : naturalSize.width
+  const effHeight = isRotated ? naturalSize.width : naturalSize.height
+
+  // Doirani to'liq qoplash uchun zarur bo'lgan qat'iy minimal masshtab
+  const minZoom =
+    effWidth > 0 && effHeight > 0
+      ? Math.max(cropSize / effWidth, cropSize / effHeight)
+      : 1
+  const maxZoom = minZoom * 3.5
+
+  // Pan chegaralarini hisoblash (rasm chetlari doiradan ichkariga kirib ketmasligi uchun)
+  const clampPan = useCallback(
+    (p, currentZoom = zoom, currentRot = rotation) => {
+      const rot = currentRot % 180 !== 0
+      const w = (rot ? naturalSize.height : naturalSize.width) * currentZoom
+      const h = (rot ? naturalSize.width : naturalSize.height) * currentZoom
+      if (!w || !h) return p
+      const maxX = Math.max(0, (w - cropSize) / 2)
+      const maxY = Math.max(0, (h - cropSize) / 2)
+      return {
+        x: Math.min(Math.max(p.x, -maxX), maxX),
+        y: Math.min(Math.max(p.y, -maxY), maxY),
+      }
+    },
+    [zoom, rotation, naturalSize.width, naturalSize.height, cropSize],
+  )
+
+  // Rasm yuklangach dastlabki markazlashtirish
   const handleImageLoad = (e) => {
     const nw = e.currentTarget.naturalWidth || 500
     const nh = e.currentTarget.naturalHeight || 500
     setNaturalSize({ width: nw, height: nh })
 
-    // Aylana to'liq to'ldirilishi uchun minimal scale
-    const scale = Math.max(cropSize / nw, cropSize / nh)
-    setBaseZoom(scale)
-    setZoom(scale)
+    const initialMin = Math.max(cropSize / nw, cropSize / nh)
+    setZoom(initialMin)
     setPan({ x: 0, y: 0 })
     setRotation(0)
   }
 
-  // 90 gradusga burish
+  // 90 gradusga burish (burilganda minZoom qayta hisoblanadi va pan chegaralanadi)
   const handleRotate = () => {
-    setRotation((r) => (r + 90) % 360)
+    const nextRot = (rotation + 90) % 360
+    setRotation(nextRot)
+
+    const rot = nextRot % 180 !== 0
+    const w = rot ? naturalSize.height : naturalSize.width
+    const h = rot ? naturalSize.width : naturalSize.height
+    const nextMin = w > 0 && h > 0 ? Math.max(cropSize / w, cropSize / h) : 1
+
+    const nextZoom = Math.max(zoom, nextMin)
+    setZoom(nextZoom)
+    setPan((p) => clampPan(p, nextZoom, nextRot))
   }
 
   // Pointer (sichqoncha va barmoq) orqali surish
@@ -72,10 +108,11 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
     if (!isDraggingRef.current) return
     const dx = e.clientX - dragStartRef.current.x
     const dy = e.clientY - dragStartRef.current.y
-    setPan({
+    const rawPan = {
       x: panStartRef.current.x + dx,
       y: panStartRef.current.y + dy,
-    })
+    }
+    setPan(clampPan(rawPan))
   }
 
   const handlePointerUp = (e) => {
@@ -89,20 +126,38 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
     }
   }
 
+  // Slider orqali masshtabni o'zgartirish
+  const handleSliderChange = (e) => {
+    const val = parseFloat(e.target.value)
+    const nextZoom = Math.min(Math.max(val, minZoom), maxZoom)
+    setZoom(nextZoom)
+    setPan((p) => clampPan(p, nextZoom))
+  }
+
+  // Qadamli masshtab (+ va - tugmalari)
+  const handleStepZoom = (step) => {
+    setZoom((curr) => {
+      const nextZoom = Math.min(Math.max(curr + step * minZoom, minZoom), maxZoom)
+      setPan((p) => clampPan(p, nextZoom))
+      return nextZoom
+    })
+  }
+
   // Sichqoncha g'ildiragi orqali zoom
   const handleWheel = (e) => {
     e.preventDefault()
     const delta = e.deltaY * -0.0015
     setZoom((curr) => {
-      const min = baseZoom * 0.8
-      const max = baseZoom * 4
-      return Math.min(Math.max(curr + delta * baseZoom, min), max)
+      const nextZoom = Math.min(Math.max(curr + delta * minZoom, minZoom), maxZoom)
+      setPan((p) => clampPan(p, nextZoom))
+      return nextZoom
     })
   }
 
   // Touch pinch to zoom (telefonda 2 barmoq bilan masshtab)
   const handleTouchMove = (e) => {
     if (e.touches.length === 2) {
+      isDraggingRef.current = false
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY,
@@ -110,9 +165,9 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
       if (touchDistRef.current != null) {
         const factor = dist / touchDistRef.current
         setZoom((curr) => {
-          const min = baseZoom * 0.8
-          const max = baseZoom * 4
-          return Math.min(Math.max(curr * factor, min), max)
+          const nextZoom = Math.min(Math.max(curr * factor, minZoom), maxZoom)
+          setPan((p) => clampPan(p, nextZoom))
+          return nextZoom
         })
       }
       touchDistRef.current = dist
@@ -121,15 +176,6 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
 
   const handleTouchEnd = () => {
     touchDistRef.current = null
-  }
-
-  // Range slider foizini hisoblash
-  const minSlider = baseZoom
-  const maxSlider = baseZoom * 3.5
-  const sliderValue = Math.min(Math.max(zoom, minSlider), maxSlider)
-
-  const handleSliderChange = (e) => {
-    setZoom(parseFloat(e.target.value))
   }
 
   // Rasmni 512x512 ga qirqib olish va qaytarish
@@ -184,6 +230,8 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
     }
   }
 
+  const activeSliderVal = Math.min(Math.max(zoom, minZoom), maxZoom)
+
   return (
     <div className="crop-modal-overlay" onClick={onCancel}>
       <div className="crop-modal" onClick={(e) => e.stopPropagation()}>
@@ -236,21 +284,37 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
           />
         </div>
 
-        {/* Controls: Zoom slider & Rotate */}
+        {/* 1-variant: Slayder va Burish bitta qatorda birlashtirilgan */}
         <div className="crop-controls">
-          <div className="crop-zoom-row">
-            <span className="crop-zoom-icon">−</span>
+          <div className="crop-zoom-bar">
+            <button
+              type="button"
+              className="crop-zoom-step-btn"
+              onClick={() => handleStepZoom(-0.25)}
+              disabled={zoom <= minZoom + 0.001}
+              aria-label="Zoom out"
+            >
+              −
+            </button>
             <input
               type="range"
-              min={minSlider}
-              max={maxSlider}
-              step={(maxSlider - minSlider) / 100}
-              value={sliderValue}
+              min={minZoom}
+              max={maxZoom}
+              step={(maxZoom - minZoom) / 100}
+              value={activeSliderVal}
               onChange={handleSliderChange}
               className="crop-zoom-slider"
               aria-label="Zoom"
             />
-            <span className="crop-zoom-icon">+</span>
+            <button
+              type="button"
+              className="crop-zoom-step-btn"
+              onClick={() => handleStepZoom(0.25)}
+              disabled={zoom >= maxZoom - 0.001}
+              aria-label="Zoom in"
+            >
+              +
+            </button>
           </div>
 
           <button
@@ -258,9 +322,10 @@ export default function AvatarCropModal({ file, onCrop, onCancel }) {
             className="crop-rotate-btn"
             onClick={handleRotate}
             title={t('profile.rotate')}
+            aria-label={t('profile.rotate')}
           >
             <RefreshCwIcon width="15" height="15" />
-            <span>{t('profile.rotate')}</span>
+            <span className="crop-rotate-label">90°</span>
           </button>
         </div>
 

@@ -858,20 +858,22 @@ export default function DeveloperConsole({ onBackToProfile }) {
               <div className="dev-detail__top-actions">
                 <button
                   type="button"
-                  className="dev-btn-secondary dev-btn-sm dev-action-edit-btn"
+                  className="dev-btn-secondary dev-btn-sm dev-btn-responsive-icon"
                   onClick={() => setModal({ type: 'edit', app: selectedApp })}
                   title={t('dev.edit')}
+                  aria-label={t('dev.edit')}
                 >
-                  <EditIcon width="13" height="13" />
-                  <span>{t('dev.edit')}</span>
+                  <EditIcon width="14" height="14" />
+                  <span className="dev-btn-text-desktop">{t('dev.edit')}</span>
                 </button>
                 <button
                   type="button"
                   className="dev-btn-secondary dev-btn-sm dev-btn-responsive-icon"
                   onClick={() => handleDownloadJson(selectedApp)}
                   title="JSON"
+                  aria-label="JSON"
                 >
-                  <CodeIcon width="13" height="13" />
+                  <CodeIcon width="14" height="14" />
                   <span className="dev-btn-text-desktop">JSON</span>
                 </button>
                 <button
@@ -879,8 +881,9 @@ export default function DeveloperConsole({ onBackToProfile }) {
                   className="dev-btn-danger dev-btn-sm dev-btn-responsive-icon"
                   onClick={() => setModal({ type: 'delete', app: selectedApp })}
                   title={t('dev.delete')}
+                  aria-label={t('dev.delete')}
                 >
-                  <TrashIcon width="13" height="13" />
+                  <TrashIcon width="14" height="14" />
                   <span className="dev-btn-text-desktop">{t('dev.delete')}</span>
                 </button>
               </div>

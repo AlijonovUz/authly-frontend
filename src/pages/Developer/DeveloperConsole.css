@@ -1996,7 +1996,7 @@
   display: none;
 }
 
-@media (max-width: 540px) {
+@media (max-width: 640px) {
   .dev-back-btn-text-desktop {
     display: none;
   }
@@ -2012,17 +2012,15 @@
     height: 36px !important;
     justify-content: center !important;
     border-radius: 9px !important;
-  }
-  .dev-action-edit-btn {
-    padding: 0 10px !important;
-    height: 36px !important;
-    font-size: 12px !important;
-    border-radius: 9px !important;
+    flex-shrink: 0 !important;
   }
   .dev-detail__sticky-header {
-    gap: 6px !important;
+    gap: 8px !important;
+    justify-content: space-between !important;
   }
   .dev-detail__top-actions {
-    gap: 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
   }
 }

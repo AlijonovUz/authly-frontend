@@ -131,28 +131,56 @@
   border: 2px solid rgba(255, 255, 255, 0.95);
 }
 
-/* Controls */
+/* Controls: 1-variant (Zoom va Burish bitta qatorda) */
 .crop-controls {
   padding: 14px 20px 10px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.crop-zoom-row {
+.crop-zoom-bar {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 12px;
-  width: 100%;
+  gap: 8px;
+  background: var(--bg-subtle, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  padding: 4px 10px;
+  border-radius: 12px;
+  height: 40px;
+  box-sizing: border-box;
 }
 
-.crop-zoom-icon {
-  font-size: 18px;
-  font-weight: 600;
+.crop-zoom-step-btn {
+  background: transparent;
+  border: none;
   color: var(--text-muted, #64748b);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
   user-select: none;
-  width: 14px;
-  text-align: center;
+  flex-shrink: 0;
+}
+
+.crop-zoom-step-btn:hover:not(:disabled) {
+  color: var(--text-strong, #0f172a);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.crop-zoom-step-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 
 .crop-zoom-slider {
@@ -166,25 +194,34 @@
 }
 
 .crop-rotate-btn {
-  align-self: center;
+  height: 40px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: var(--bg-subtle, #f8fafc);
   border: 1px solid var(--border-subtle, #e2e8f0);
-  border-radius: 9px;
-  padding: 6px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
+  border-radius: 12px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--text-strong, #334155);
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
+  user-select: none;
+  box-sizing: border-box;
 }
 
 .crop-rotate-btn:hover {
   background: var(--bg-surface, #ffffff);
-  border-color: var(--border-sub, #cbd5e1);
+  border-color: var(--accent-default, #2563eb);
   color: var(--accent-default, #2563eb);
+}
+
+.crop-rotate-label {
+  font-size: 12.5px;
+  font-weight: 700;
 }
 
 /* Footer / Actions */
@@ -252,6 +289,10 @@
   }
   .crop-controls {
     padding: 12px 16px 8px;
+    gap: 8px;
+  }
+  .crop-rotate-btn {
+    padding: 0 10px;
   }
   .crop-modal__footer {
     padding: 10px 16px 16px;
